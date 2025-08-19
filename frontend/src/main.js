@@ -36,6 +36,7 @@ const vuetify = createVuetify({
     },
   },
 })
+
 const app = createApp(App)
 
 registerPlugins(app)
