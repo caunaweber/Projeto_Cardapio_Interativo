@@ -1,18 +1,7 @@
 <template>
   <v-container fluid>
-    <MenuAppBar 
-      :isDark="theme.global.current.value.dark" 
-      @toggleTheme="toggleTheme" 
-      @toggleDrawer="drawer = !drawer" 
-    />
 
-    <MenuSidebar
-      v-model="drawer"
-      :pedidos="pedidos"
-      :totalPreco="totalPreco"
-      @remover="remover"
-      @finalizar="dialogConfirmar = true" 
-    />
+    <MenuAppBar :is-dark="!isDark" @toggleTheme="toggleTheme" @toggleDrawer="drawer = !drawer" />
 
     <v-main>
       <v-container class="py-8">
@@ -20,25 +9,46 @@
           <h2 class="mb-6 text-h5 font-weight-bold text-primary">{{ categoria.nome }}</h2>
           <v-row dense>
             <v-col v-for="produto in categoria.itens" :key="produto.id" cols="12" lg="3" md="4" sm="6">
-              <MenuCard :produto="produto" @adicionar="adicionar" @remover="remover" />
+              <MenuCard :item="produto" @adicionar="adicionar" @remover="remover" />
             </v-col>
           </v-row>
         </div>
       </v-container>
     </v-main>
 
-    <MenuFooter 
-      :totalItens="totalItens" 
-      :totalPreco="totalPreco" 
-      @finalizar="dialogConfirmar = true" 
-    />
+    <MenuSidebar v-model="drawer" :items="pedidos" :total-preco="totalPreco" title="🛒 Meus Pedidos"
+      action-text="Finalizar pedido" @remover="remover" @finalizar="dialogConfirmar = true" />
 
-    <MenuDialog 
-      v-model="dialogConfirmar"
-      :pedidos="pedidos"
-      :totalPreco="totalPreco"
-      @confirmar="confirmarPedido" 
-    />
+    <MenuDialog v-model="dialogConfirmar">
+      <template #title>
+        ✅ Confirmar Pedido
+      </template>
+
+      <template #default>
+        <v-list>
+          <v-list-item v-for="produto in pedidos" :key="produto.id">
+            <v-list-item-title>{{ produto.nome }}</v-list-item-title>
+            <v-list-item-subtitle>
+              {{ produto.qtd }}x - R$ {{ (produto.qtd * produto.preco).toFixed(2) }}
+            </v-list-item-subtitle>
+          </v-list-item>
+        </v-list>
+
+        <v-divider class="my-2" />
+
+        <div class="text-right font-weight-bold text-subtitle-1">
+          Total: R$ {{ totalPreco.toFixed(2) }}
+        </div>
+      </template>
+
+      <template #actions>
+        <v-btn variant="text" @click="dialogConfirmar = false">Cancelar</v-btn>
+        <v-btn color="success" rounded="xl" @click="confirmarPedido">Confirmar</v-btn>
+      </template>
+    </MenuDialog>
+
+    <MenuFooter :totalItens="totalItens" :totalPreco="totalPreco" @action="dialogConfirmar = true" />
+
   </v-container>
 </template>
 
@@ -46,6 +56,7 @@
 import MenuFooter from '@/components/MenuFooter.vue'
 import { computed, reactive } from 'vue'
 import { useTheme } from 'vuetify'
+import { ref } from "vue"
 
 const drawer = ref(false)
 
@@ -128,8 +139,10 @@ const confirmarPedido = () => {
 
 const theme = useTheme()
 
+const isDark = computed(() => theme.global.current.value.dark)
+
 const toggleTheme = () => {
-  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
+  theme.global.name.value = isDark.value ? 'light' : 'dark'
 }
 </script>
 
