@@ -23,7 +23,7 @@
         :color="actionColor"
         rounded="xl"
         variant="flat"
-        @click="$emit('toggleDrawer')"
+        @click="$emit('toggle-drawer')"
       >
         {{ actionText }}
       </v-btn>
@@ -33,7 +33,7 @@
 
 <script setup>
   import ThemeToggle from '@/components/ThemeToggle.vue'
-  defineEmits(['toggleDrawer'])
+  defineEmits(['toggle-drawer'])
   defineProps({
     isDark: Boolean,
     title: {

@@ -1,14 +1,14 @@
 <template>
   <v-app>
     <MenuAppBar
-      title="🍳 Restaurante - Cozinha"
+      title="🍳 Restaurante - Comandas"
     >
       <template #actions>
         <v-select
           v-model="filtro"
           density="compact"
           hide-details
-          :items="['Todos', 'A Entregar', 'Entregue']"
+          :items="['A Entregar', 'Entregue', 'Todos']"
           style="max-width: 150px"
           variant="outlined"
         />
@@ -26,9 +26,10 @@
         :bg-color="comanda.bgColor"
         :itens="comanda.itens"
         :mesa="comanda.mesa"
+        :num="comanda.numero"
         :status="comanda.status"
         :tempo="comanda.tempo"
-        @action="handleAction(comanda)"
+        @action="atualizaStatus(comanda)"
       />
     </v-container>
   </v-app>
@@ -39,33 +40,32 @@
   import KitchenCard from '@/components/KitchenCard.vue'
   import MenuAppBar from '@/components/MenuAppBar.vue'
 
-  const filtro = ref('Todos')
+  const filtro = ref('A Entregar')
 
-  // Definindo cores compatíveis com o tema
   const comandas = ref([
     {
       mesa: 5,
       status: 'A Entregar',
+      numero: 1,
       itens: [
         { qtd: 1, nome: 'prato 1' },
         { qtd: 2, nome: 'entrada 2' },
         { qtd: 1, nome: 'limonada' },
       ],
       tempo: '20:30',
-      acao: { texto: 'Finalizado', cor: 'success' }, // botão verde do tema
-      bgColor: 'surface', // fundo padrão do tema
+      acao: { texto: 'Finalizar', cor: 'success' },
     },
     {
       mesa: 6,
       status: 'Entregue',
+      numero: 2,
       itens: [
         { qtd: 1, nome: 'prato 1' },
         { qtd: 1, nome: 'prato 2' },
         { qtd: 2, nome: 'vinho' },
       ],
       tempo: '01:15',
-      acao: { texto: 'Editar', cor: 'primary' }, // botão azul do tema
-      bgColor: 'surface', // fundo padrão do tema
+      acao: { texto: 'Editar', cor: 'primary' },
     },
   ])
 
@@ -74,7 +74,13 @@
     return comandas.value.filter(c => c.status === filtro.value)
   })
 
-  function handleAction (comanda) {
-    console.log('Ação clicada na comanda:', comanda)
+  function atualizaStatus (comanda) {
+    if (comanda.status === 'A Entregar') {
+      comanda.status = 'Entregue'
+      comanda.acao = { texto: 'Editar', cor: 'primary' }
+    } else if (comanda.status === 'Entregue') {
+      comanda.status = 'A Entregar'
+      comanda.acao = { texto: 'Finalizar', cor: 'success' }
+    }
   }
 </script>

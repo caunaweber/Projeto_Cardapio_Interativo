@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
 
-    <MenuAppBar />
+    <MenuAppBar @toggle-drawer="drawer = !drawer" />
 
     <v-main>
       <v-container class="py-1">
