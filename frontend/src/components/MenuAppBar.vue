@@ -1,52 +1,60 @@
 <template>
-    <v-app-bar app class="px-4" :color="color" :elevation="elevation" flat rounded="lg">
-        <v-app-bar-title class="font-weight-bold text-h5">
-            <slot name="title">
-                {{ title }}
-            </slot>
-        </v-app-bar-title>
+  <v-app-bar
+    app
+    class="px-4"
+    :color="color"
+    :elevation="elevation"
+    flat
+    rounded="lg"
+  >
+    <v-app-bar-title class="font-weight-bold text-h5">
+      <slot name="title">
+        {{ title }}
+      </slot>
+    </v-app-bar-title>
 
-        <v-spacer />
+    <v-spacer />
 
-        <slot name="theme">
-            <v-btn icon variant="text" @click="$emit('toggleTheme')">
-                <v-icon size="26">
-                    {{ isDark ? 'mdi-weather-sunny' : 'mdi-weather-night' }}
-                </v-icon>
-            </v-btn>
-        </slot>
+    <ThemeToggle />
 
-        <slot name="actions">
-            <v-btn class="ml-3 font-weight-bold" :color="actionColor" rounded="xl" variant="flat"
-                @click="$emit('toggleDrawer')">
-                {{ actionText }}
-            </v-btn>
-        </slot>
-    </v-app-bar>
+    <slot name="actions">
+      <v-btn
+        class="ml-3 font-weight-bold"
+        :color="actionColor"
+        rounded="xl"
+        variant="flat"
+        @click="$emit('toggleDrawer')"
+      >
+        {{ actionText }}
+      </v-btn>
+    </slot>
+  </v-app-bar>
 </template>
 
 <script setup>
-defineProps({
+  import ThemeToggle from '@/components/ThemeToggle.vue'
+  defineEmits(['toggleDrawer'])
+  defineProps({
     isDark: Boolean,
     title: {
-        type: String,
-        default: "🍴 Restaurante"
+      type: String,
+      default: '🍴 Restaurante',
     },
     color: {
-        type: String,
-        default: "primary"
+      type: String,
+      default: 'primary',
     },
     elevation: {
-        type: [String, Number],
-        default: 2
+      type: [String, Number],
+      default: 2,
     },
     actionText: {
-        type: String,
-        default: "Meus pedidos"
+      type: String,
+      default: 'Meus pedidos',
     },
     actionColor: {
-        type: String,
-        default: "secondary"
-    }
-})
+      type: String,
+      default: 'secondary',
+    },
+  })
 </script>

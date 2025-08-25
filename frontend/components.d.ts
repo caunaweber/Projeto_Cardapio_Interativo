@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    KitchenCard: typeof import('./src/components/KitchenCard.vue')['default']
     MenuAppBar: typeof import('./src/components/MenuAppBar.vue')['default']
     MenuCard: typeof import('./src/components/MenuCard.vue')['default']
     MenuDialog: typeof import('./src/components/MenuDialog.vue')['default']
@@ -15,5 +16,6 @@ declare module 'vue' {
     MenuSidebar: typeof import('./src/components/MenuSidebar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    ThemeToggle: typeof import('./src/components/ThemeToggle.vue')['default']
   }
 }
