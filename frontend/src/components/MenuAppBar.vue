@@ -15,11 +15,11 @@
 
     <v-spacer />
 
-    <ThemeToggle />
+    <ThemeToggle class="mr-2"/>
 
     <slot name="actions">
       <v-btn
-        class="ml-3 font-weight-bold"
+        class="ml-1 font-weight-bold"
         :color="actionColor"
         rounded="xl"
         variant="flat"

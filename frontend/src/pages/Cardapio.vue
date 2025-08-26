@@ -3,25 +3,23 @@
 
     <MenuAppBar @toggle-drawer="drawer = !drawer" />
 
-    <v-main>
-      <v-container class="py-1">
-        <div v-for="categoria in categorias" :key="categoria.nome" class="mb-10">
-          <h2 class="mb-6 text-h5 font-weight-bold text-primary">{{ categoria.nome }}</h2>
-          <v-row dense>
-            <v-col
-              v-for="produto in categoria.itens"
-              :key="produto.id"
-              cols="12"
-              lg="3"
-              md="4"
-              sm="6"
-            >
-              <MenuCard :item="produto" @adicionar="adicionar" @remover="remover" />
-            </v-col>
-          </v-row>
-        </div>
-      </v-container>
-    </v-main>
+    <v-container class="py-1">
+      <div v-for="categoria in categorias" :key="categoria.nome" class="mb-10">
+        <h2 class="mb-6 text-h5 font-weight-bold text-primary">{{ categoria.nome }}</h2>
+        <v-row dense>
+          <v-col
+            v-for="produto in categoria.itens"
+            :key="produto.id"
+            cols="12"
+            lg="3"
+            md="4"
+            sm="6"
+          >
+            <MenuCard :item="produto" @adicionar="adicionar" @remover="remover" />
+          </v-col>
+        </v-row>
+      </div>
+    </v-container>
 
     <MenuSidebar
       v-model="drawer"
