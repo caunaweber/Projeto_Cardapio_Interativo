@@ -1,52 +1,36 @@
 <template>
   <v-app-bar
     app
-    class="px-4"
-    :color="color"
-    :elevation="elevation"
+    class="px-6 py-2 d-flex align-center"
+    elevation="0"
     flat
-    rounded="lg"
+    style="background: transparent; position: fixed; top: 0; left: 0; right: 0; z-index: 10;"
   >
-    <v-app-bar-title class="font-weight-bold text-h5">
-      <slot name="title">
+    <div class="d-flex align-center pa-2 px-4 glass-card">
+      <v-avatar class="mr-2" size="40">
+        <v-img alt="Logo Restaurante" src="/logo.png" />
+      </v-avatar>
+      <span class="font-weight-bold text-h6">
         {{ title }}
-      </slot>
-    </v-app-bar-title>
+      </span>
+    </div>
 
     <v-spacer />
 
-    <ThemeToggle class="mr-2"/>
-
-    <slot name="actions">
-      <v-btn
-        class="ml-1 font-weight-bold"
-        :color="actionColor"
-        rounded="xl"
-        variant="flat"
-        @click="$emit('toggle-drawer')"
-      >
-        {{ actionText }}
-      </v-btn>
-    </slot>
+    <div class="d-flex align-center pa-2 px-4 glass-card">
+      <ThemeToggle class="mr-3" />
+      <slot name="actions" :toggle-drawer="$emit.bind(null, 'toggle-drawer')" />
+    </div>
   </v-app-bar>
 </template>
 
 <script setup>
   import ThemeToggle from '@/components/ThemeToggle.vue'
-  defineEmits(['toggle-drawer'])
+
   defineProps({
-    isDark: Boolean,
     title: {
       type: String,
       default: '🍴 Restaurante',
-    },
-    color: {
-      type: String,
-      default: 'primary',
-    },
-    elevation: {
-      type: [String, Number],
-      default: 2,
     },
     actionText: {
       type: String,
@@ -57,4 +41,17 @@
       default: 'secondary',
     },
   })
+
+  defineEmits(['toggle-drawer'])
 </script>
+
+<style scoped>
+.glass-card {
+  background-color: rgb(var(--v-theme-primary));
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+</style>

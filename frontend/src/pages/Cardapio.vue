@@ -1,11 +1,23 @@
 <template>
   <v-container fluid>
 
-    <MenuAppBar @toggle-drawer="drawer = !drawer" />
+    <MenuAppBar @toggle-drawer="drawer = !drawer">
+      <template #actions="{ toggleDrawer }">
+        <v-btn
+          class="font-weight-bold"
+          color="secondary"
+          rounded="xl"
+          variant="flat"
+          @click="toggleDrawer()"
+        >
+          Meus pedidos
+        </v-btn>
+      </template>
+    </MenuAppBar>
 
     <v-container class="py-1">
       <div v-for="categoria in categorias" :key="categoria.nome" class="mb-10">
-        <h2 class="mb-6 text-h5 font-weight-bold text-primary">{{ categoria.nome }}</h2>
+        <h2 class="mb-6 text-h5 font-weight-bold text-primary border-b-md pb-4">{{ categoria.nome }}</h2>
         <v-row dense>
           <v-col
             v-for="produto in categoria.itens"

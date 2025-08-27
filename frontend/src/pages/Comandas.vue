@@ -1,7 +1,5 @@
 <template>
-  <MenuAppBar
-    title="🍳 Restaurante - Gerenciamento de Comandas"
-  >
+  <MenuAppBar title="🍳 Restaurante - Gerenciamento de Comandas">
     <template #actions>
       <v-select
         v-model="filtro"
@@ -16,27 +14,30 @@
 
   <v-container class="mt-4">
     <h3 class="mb-4">
-    Comandas <span v-if="filtro !== 'Todos'">- {{ filtro }}</span>
+      Comandas <span v-if="filtro !== 'Todos'">- {{ filtro }}</span>
     </h3>
 
     <v-row dense>
-      <v-col v-for="comanda in comandasFiltradas"
+      <v-col
+        v-for="comanda in comandasFiltradas"
+        :key="comanda.mesa"
         cols="12"
         lg="4"
         md="6"
-        sm="12">
-      <KitchenCard
-      :key="comanda.mesa"
-      :action-color="comanda.acao.cor"
-      :action-text="comanda.acao.texto"
-      :bg-color="comanda.bgColor"
-      :itens="comanda.itens"
-      :mesa="comanda.mesa"
-      :num="comanda.numero"
-      :status="comanda.status"
-      :tempo="comanda.tempo"
-      @action="atualizaStatus(comanda)"
-    />
+        sm="12"
+      >
+        <KitchenCard
+          :key="comanda.mesa"
+          :action-color="comanda.acao.cor"
+          :action-text="comanda.acao.texto"
+          :bg-color="comanda.bgColor"
+          :itens="comanda.itens"
+          :mesa="comanda.mesa"
+          :num="comanda.numero"
+          :status="comanda.status"
+          :tempo="comanda.tempo"
+          @action="atualizaStatus(comanda)"
+        />
       </v-col>
     </v-row>
   </v-container>
@@ -51,9 +52,9 @@
 
   const comandas = ref([
     {
-      mesa: 5,
+      mesa: 1,
       status: 'A Entregar',
-      numero: 1,
+      numero: 101,
       itens: [
         { qtd: 1, nome: 'prato 1' },
         { qtd: 2, nome: 'entrada 2' },
@@ -63,9 +64,9 @@
       acao: { texto: 'Finalizar', cor: 'success' },
     },
     {
-      mesa: 6,
+      mesa: 2,
       status: 'Entregue',
-      numero: 2,
+      numero: 102,
       itens: [
         { qtd: 1, nome: 'prato 1' },
         { qtd: 1, nome: 'prato 2' },
@@ -75,9 +76,21 @@
       acao: { texto: 'Editar', cor: 'primary' },
     },
     {
-      mesa: 5,
+      mesa: 3,
       status: 'A Entregar',
-      numero: 1,
+      numero: 103,
+      itens: [
+        { qtd: 1, nome: 'prato 1' },
+        { qtd: 2, nome: 'entrada 2' },
+        { qtd: 1, nome: 'limonada' },
+      ],
+      tempo: '20:30',
+      acao: { texto: 'Finalizar', cor: 'success' },
+    },
+    {
+      mesa: 4,
+      status: 'A Entregar',
+      numero: 104,
       itens: [
         { qtd: 1, nome: 'prato 1' },
         { qtd: 2, nome: 'entrada 2' },
@@ -89,19 +102,7 @@
     {
       mesa: 5,
       status: 'A Entregar',
-      numero: 1,
-      itens: [
-        { qtd: 1, nome: 'prato 1' },
-        { qtd: 2, nome: 'entrada 2' },
-        { qtd: 1, nome: 'limonada' },
-      ],
-      tempo: '20:30',
-      acao: { texto: 'Finalizar', cor: 'success' },
-    },
-    {
-      mesa: 5,
-      status: 'A Entregar',
-      numero: 1,
+      numero: 105,
       itens: [
         { qtd: 1, nome: 'prato 1' },
         { qtd: 2, nome: 'entrada 2' },
@@ -113,7 +114,7 @@
     {
       mesa: 6,
       status: 'Entregue',
-      numero: 2,
+      numero: 106,
       itens: [
         { qtd: 1, nome: 'prato 1' },
         { qtd: 1, nome: 'prato 2' },
@@ -123,9 +124,9 @@
       acao: { texto: 'Editar', cor: 'primary' },
     },
     {
-      mesa: 6,
+      mesa: 7,
       status: 'Entregue',
-      numero: 2,
+      numero: 107,
       itens: [
         { qtd: 1, nome: 'prato 1' },
         { qtd: 1, nome: 'prato 2' },
@@ -135,9 +136,9 @@
       acao: { texto: 'Editar', cor: 'primary' },
     },
     {
-      mesa: 6,
+      mesa: 8,
       status: 'Entregue',
-      numero: 2,
+      numero: 108,
       itens: [
         { qtd: 1, nome: 'prato 1' },
         { qtd: 1, nome: 'prato 2' },
