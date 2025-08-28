@@ -1,54 +1,56 @@
 <template>
-    <v-footer app class="pa-2" :color="color" :dark="dark" :elevation="elevation">
-        <div class="text-body-1">
-            <slot name="left">
-                🛒 Itens: <strong>{{ totalItens }}</strong> |
-                💰 Total: <strong>R$ {{ totalPreco.toFixed(2) }}</strong>
-            </slot>
-        </div>
+  <div class="menu-footer">
 
-        <v-spacer />
+    <div class="footer-card content-card rounded-te-lg">
+      <slot name="content" />
+    </div>
+    <div class="actions-card rounded-ts-lg">
+      <slot name="actions" />
+    </div>
 
-        <slot name="actions">
-            <v-btn class="font-weight-bold" :color="buttonColor" rounded="xl" size="large" variant="flat"
-                @click="$emit('action')">
-                {{ buttonText }}
-            </v-btn>
-        </slot>
-    </v-footer>
+  </div>
 </template>
 
 <script setup>
-defineProps({
-    totalItens: {
-        type: Number,
-        default: 0
-    },
-    totalPreco: {
-        type: Number,
-        default: 0
-    },
-    buttonText: {
-        type: String,
-        default: "Finalizar pedido"
-    },
-    buttonColor: {
-        type: String,
-        default: "secondary"
-    },
-    color: {
-        type: String,
-        default: "primary"
-    },
-    dark: {
-        type: Boolean,
-        default: true
-    },
-    elevation: {
-        type: [Number, String],
-        default: 8
-    }
-})
-
-defineEmits(['action'])
+  defineProps({
+    totalItens: { type: Number, default: 0 },
+    totalPreco: { type: Number, default: 0 },
+  })
+  defineEmits(['action'])
 </script>
+
+<style scoped>
+.menu-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.footer-card {
+  pointer-events: all;
+  padding: 5px 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  display: inline-flex;
+  align-items: center;
+  font-weight: bold;
+}
+
+.content-card {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+}
+
+.actions-card {
+  pointer-events: all;
+  display: inline-flex;
+  align-items: center;
+  font-weight: bold;
+  position: fixed;
+  bottom: 20px;
+  right: 10px;
+  padding: 5px 8px;
+}
+
+</style>

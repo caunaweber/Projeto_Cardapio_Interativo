@@ -1,11 +1,11 @@
 <template>
-  <v-container fluid>
+  <v-container class="menu-bg" fluid>
 
-    <MenuAppBar @toggle-drawer="drawer = !drawer">
+    <MenuAppBar title="🍴 Restaurante - Cardápio" @toggle-drawer="drawer = !drawer">
       <template #actions="{ toggleDrawer }">
         <v-btn
           class="font-weight-bold"
-          color="secondary"
+          color="success"
           rounded="xl"
           variant="flat"
           @click="toggleDrawer()"
@@ -71,7 +71,20 @@
       </template>
     </MenuDialog>
 
-    <MenuFooter :total-itens="totalItens" :total-preco="totalPreco" @action="dialogConfirmar = true" />
+    <MenuFooter :total-itens="totalItens" :total-preco="totalPreco" @action="dialogConfirmar = true">
+
+      <template #actions>
+        <v-btn
+          color="success"
+          density="default"
+          rounded="xl"
+          size="large"
+          @click="dialogConfirmar = true"
+        >
+          Finalizar Pedido
+        </v-btn>
+      </template>
+    </MenuFooter>
 
   </v-container>
 </template>
@@ -162,6 +175,7 @@
 </script>
 
 <style scoped>
+
 .transition-fast {
   transition: all 0.2s ease-in-out;
 }
@@ -169,4 +183,5 @@
 .transition-fast:hover {
   transform: translateY(-4px);
 }
+
 </style>

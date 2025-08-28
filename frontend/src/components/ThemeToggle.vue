@@ -1,5 +1,5 @@
 <template>
-  <v-btn icon @click="toggleTheme" class="border-md rounded-xl" density="comfortable">
+  <v-btn class="border-md rounded-xl" density="comfortable" icon @click="toggleTheme">
     <v-icon size="26">
       {{ isDark ? 'mdi-weather-night' : 'mdi-weather-sunny' }}
     </v-icon>

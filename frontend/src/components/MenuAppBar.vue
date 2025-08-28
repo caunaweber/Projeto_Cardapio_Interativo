@@ -1,12 +1,11 @@
 <template>
   <v-app-bar
     app
-    class="px-6 py-2 d-flex align-center"
-    elevation="0"
+    class="glass-appbar d-flex align-center px-4"
     flat
-    style="background: transparent; position: fixed; top: 0; left: 0; right: 0; z-index: 10;"
+    height="56"
   >
-    <div class="d-flex align-center pa-2 px-4 glass-card">
+    <div class="d-flex align-center">
       <v-avatar class="mr-2" size="40">
         <v-img alt="Logo Restaurante" src="/logo.png" />
       </v-avatar>
@@ -17,7 +16,7 @@
 
     <v-spacer />
 
-    <div class="d-flex align-center pa-2 px-4 glass-card">
+    <div class="d-flex align-center">
       <ThemeToggle class="mr-3" />
       <slot name="actions" :toggle-drawer="$emit.bind(null, 'toggle-drawer')" />
     </div>
@@ -32,26 +31,18 @@
       type: String,
       default: '🍴 Restaurante',
     },
-    actionText: {
-      type: String,
-      default: 'Meus pedidos',
-    },
-    actionColor: {
-      type: String,
-      default: 'secondary',
-    },
   })
 
   defineEmits(['toggle-drawer'])
 </script>
 
 <style scoped>
-.glass-card {
-  background-color: rgb(var(--v-theme-primary));
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+.glass-appbar {
+  background: rgba(var(--v-theme-surface), 0.7);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(var(--v-theme-primary));
 }
-
+.v-avatar {
+  border: 2px solid rgba(var(--v-theme-primary), 0.8);
+}
 </style>

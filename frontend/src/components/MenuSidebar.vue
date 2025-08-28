@@ -92,7 +92,7 @@ const props = defineProps({
   },
   actionColor: {
     type: String,
-    default: "secondary",
+    default: "success",
   },
   showTotal: {
     type: Boolean,

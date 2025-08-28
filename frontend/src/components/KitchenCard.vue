@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pa-3 mb-3" :color="bgColorTheme" :elevation="elevation" rounded="xl">
+  <v-card class="pa-3 mb-3 menu-card-border" :color="bgColorTheme" :elevation="elevation" rounded="xl">
     <div class="d-flex justify-space-between align-center mb-2">
 
       <div class="d-flex align-center gap-2">
@@ -96,3 +96,9 @@
     }
   })
 </script>
+
+<style>
+.menu-card-border {
+  border: 2px solid rgba(var(--v-theme-primary), 0.75);
+}
+</style>

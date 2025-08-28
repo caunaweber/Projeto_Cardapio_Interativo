@@ -12,7 +12,7 @@
     </template>
   </MenuAppBar>
 
-  <v-container class="mt-4">
+  <v-container class="mt-4" fluid>
     <h3 class="mb-4">
       Comandas <span v-if="filtro !== 'Todos'">- {{ filtro }}</span>
     </h3>
@@ -22,7 +22,7 @@
         v-for="comanda in comandasFiltradas"
         :key="comanda.mesa"
         cols="12"
-        lg="4"
+        lg="3"
         md="6"
         sm="12"
       >
