@@ -1,23 +1,23 @@
 <template>
-  <v-card class="pa-3 mb-3 menu-card-border" :color="bgColorTheme" :elevation="elevation" rounded="xl">
+  <v-card
+    class="pa-3 mb-4 menu-card-border"
+    :color="cardColor"
+    :elevation="elevation"
+    rounded="xl"
+  >
     <div class="d-flex justify-space-between align-center mb-2">
-
-      <div class="d-flex align-center gap-2">
-        <div class="font-weight-bold text-subtitle-1 me-4">
-          Mesa {{ mesa }}
-        </div>
+      <div>
+        <div class="font-weight-bold text-subtitle-1">Mesa {{ mesa }}</div>
         <div class="text-body-2 text-medium-emphasis">
-          <span class="text-small">comanda </span>#{{ num }}
+          <span class="text-small">Comanda </span>#{{ num }}
         </div>
       </div>
 
-      <div :class="statusClass">
-        {{ status }}
-      </div>
+      <div :class="statusClass">{{ status }}</div>
 
       <v-btn
         :color="actionColorTheme"
-        rounded="lg"
+        rounded="xl"
         size="small"
         variant="flat"
         @click="$emit('action')"
@@ -28,11 +28,13 @@
 
     <v-divider />
 
-    <v-list density="compact">
-      <v-list-item v-for="(item, i) in itens" :key="i">
-        <v-list-item-title>
-          {{ item.qtd }}x {{ item.nome }}
-        </v-list-item-title>
+    <v-list bg-color="transparent" density="compact">
+      <v-list-item
+        v-for="(item, i) in itens"
+        :key="i"
+        bg-color="transparent"
+      >
+        <v-list-item-title>{{ item.qtd }}x {{ item.nome }}</v-list-item-title>
       </v-list-item>
     </v-list>
 
@@ -76,22 +78,33 @@
     },
     elevation: {
       type: [String, Number],
-      default: 2,
+      default: 3,
     },
   })
 
-  const bgColorTheme = computed(() => theme.global.current.value.colors[props.bgColor] || props.bgColor)
-  const actionColorTheme = computed(() => theme.global.current.value.colors[props.actionColor] || props.actionColor)
+  const cardColor = computed(() => {
+    const isDark = theme.global.current.value.dark
+    if (!isDark) return '#fdfdd7ff'
+    const darkToken = props.bgColor || 'surface'
+    return theme.global.current.value.colors[darkToken] || darkToken
+  })
+  const actionColorTheme = computed(
+    () => theme.global.current.value.colors[props.actionColor] || props.actionColor,
+  )
 
   const statusClass = computed(() => {
     switch (props.status) {
-      case 'A Entregar': { return 'text-warning font-weight-bold'
+      case 'A Entregar': {
+        return 'text-warning font-weight-bold'
       }
-      case 'Entregue': { return 'text-success font-weight-bold'
+      case 'Entregue': {
+        return 'text-success font-weight-bold'
       }
-      case 'Em Preparo': { return 'text-primary font-weight-bold'
+      case 'Em Preparo': {
+        return 'text-primary font-weight-bold'
       }
-      default: { return 'text-body-2'
+      default: {
+        return 'text-body-2'
       }
     }
   })

@@ -12,10 +12,10 @@
     </template>
   </MenuAppBar>
 
-  <v-container class="mt-4" fluid>
-    <h3 class="mb-4">
+  <v-container class="py-6" fluid>
+    <h2 class="mb-6 text-h5 font-weight-bold text-primary border-b-md pb-4">
       Comandas <span v-if="filtro !== 'Todos'">- {{ filtro }}</span>
-    </h3>
+    </h2>
 
     <v-row dense>
       <v-col
@@ -23,14 +23,12 @@
         :key="comanda.mesa"
         cols="12"
         lg="3"
-        md="6"
-        sm="12"
+        md="4"
+        sm="6"
       >
         <KitchenCard
-          :key="comanda.mesa"
           :action-color="comanda.acao.cor"
           :action-text="comanda.acao.texto"
-          :bg-color="comanda.bgColor"
           :itens="comanda.itens"
           :mesa="comanda.mesa"
           :num="comanda.numero"
