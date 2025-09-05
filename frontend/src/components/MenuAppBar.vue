@@ -5,6 +5,8 @@
     flat
     height="56"
   >
+    <slot name="left" />
+
     <div class="d-flex align-center">
       <v-avatar class="mr-2" size="40">
         <v-img alt="Logo Restaurante" src="/logo.png" />

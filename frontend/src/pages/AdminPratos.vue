@@ -1,6 +1,13 @@
 <template>
   <v-container fluid>
-    <MenuAppBar title="🍳 Administração - Pratos">
+    <MenuAppBar title="🍳 Gerenciamento - Pratos" @toggle-drawer="drawer = !drawer">
+      <template #left>
+        <v-btn icon @click="drawer = !drawer">
+          <v-icon>mdi-menu</v-icon>
+        </v-btn>
+
+      </template>
+
       <template #actions>
         <v-btn
           color="success"
@@ -8,13 +15,13 @@
           variant="flat"
           @click="abrirDialog()"
         >
-          Novo Prato
+          ➕ Novo Prato
         </v-btn>
       </template>
     </MenuAppBar>
 
     <v-container class="py-6">
-      <v-row class="mb-4" dense>
+      <v-row class="mb-4">
         <v-col cols="12" md="10">
           <v-text-field
             v-model="search"
@@ -28,8 +35,8 @@
         <v-col cols="12" md="2">
           <v-select
             v-model="filtroCategoria"
-            :items="['Todos', ...categorias]"
             hide-details
+            :items="['Todos', ...categorias]"
             label="Filtrar por categoria"
             prepend-inner-icon="mdi-filter"
             rounded="xl"
@@ -40,14 +47,16 @@
 
       <v-data-table
         class="elevation-2 rounded-xl"
+        density="comfortable"
         :headers="headers"
         item-value="id"
         :items="pratosFiltrados"
         :search="search"
       >
         <template #item.imagem="{ item }">
-          <v-avatar rounded size="60">
-            <v-img :src="item.imagem || 'no-image.png'" />
+          <v-avatar class="my-1" rounded size="70">
+            <v-img :src="item.imagem ? '/' + item.imagem : '/no-image.png'" />
+
           </v-avatar>
         </template>
 
@@ -99,8 +108,8 @@
             label="Preço"
             prefix="R$"
             required
-            type="number"
             step="0.01"
+            type="number"
           />
 
           <v-file-input
@@ -130,107 +139,114 @@
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" rounded="xl" timeout="2500">
       {{ snackbar.text }}
     </v-snackbar>
-    
+
     <ConfirmDialog
       v-model="confirmDialog"
-      title="Remover prato"
       message="Tem certeza que deseja excluir este prato? Essa ação não pode ser desfeita."
+      title="Remover prato"
       @confirm="removerPrato(pratoSelecionado)"
     />
+
+    <NavSidebar v-model="drawer" :pagina-atual="'pratos'" @logout="logout" />
+
   </v-container>
 </template>
 
 <script setup>
-import { reactive, ref, watch, computed } from 'vue'
-import MenuAppBar from '@/components/MenuAppBar.vue'
-import MenuDialog from '@/components/MenuDialog.vue'
-import ConfirmDialog from '@/components/ConfirmDialog.vue'
+  import { computed, reactive, ref, watch } from 'vue'
+  import ConfirmDialog from '@/components/ConfirmDialog.vue'
+  import MenuAppBar from '@/components/MenuAppBar.vue'
+  import MenuDialog from '@/components/MenuDialog.vue'
 
-const confirmDialog = ref(false)
-const pratoSelecionado = ref(null)
-const dialog = ref(false)
-const pratoEditando = ref(null)
-const search = ref('')
-const filtroCategoria = ref('Todos')
+  const confirmDialog = ref(false)
+  const pratoSelecionado = ref(null)
+  const dialog = ref(false)
+  const pratoEditando = ref(null)
+  const search = ref('')
+  const filtroCategoria = ref('Todos')
+  const drawer = ref(false)
 
-const headers = [
-  { title: 'Imagem', key: 'imagem', align: 'center' },
-  { title: 'Nome', key: 'nome' },
-  { title: 'Categoria', key: 'categoria' },
-  { title: 'Preço', key: 'preco', align: 'end' },
-  { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
-]
+  const headers = [
+    { title: 'Imagem', key: 'imagem', align: 'center' },
+    { title: 'Nome', key: 'nome' },
+    { title: 'Categoria', key: 'categoria' },
+    { title: 'Preço', key: 'preco', align: 'end' },
+    { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
+  ]
 
-const categorias = ['Entrada', 'Prato Principal', 'Bebida', 'Sobremesa']
+  const categorias = ['Entrada', 'Prato Principal', 'Bebida', 'Sobremesa']
 
-const pratos = ref([
-  { id: 1, nome: 'Prato 1', categoria: 'Prato Principal', preco: 25, imagem: 'image.png' },
-  { id: 2, nome: 'Suco de Laranja', categoria: 'Bebida', preco: 12, imagem: 'suco.png' },
-  { id: 3, nome: 'Petit Gateau', categoria: 'Sobremesa', preco: 20, imagem: 'sobremesa.png' },
-])
+  const pratos = ref([
+    { id: 1, nome: 'Prato 1', categoria: 'Prato Principal', preco: 25, imagem: 'image.png' },
+    { id: 2, nome: 'Suco de Laranja', categoria: 'Bebida', preco: 12, imagem: 'suco.png' },
+    { id: 3, nome: 'Petit Gateau', categoria: 'Sobremesa', preco: 20 },
+  ])
 
-const pratosFiltrados = computed(() => {
-  if (filtroCategoria.value === 'Todos' || !filtroCategoria.value) return pratos.value
-  return pratos.value.filter(p => p.categoria === filtroCategoria.value)
-})
+  const pratosFiltrados = computed(() => {
+    if (filtroCategoria.value === 'Todos' || !filtroCategoria.value) return pratos.value
+    return pratos.value.filter(p => p.categoria === filtroCategoria.value)
+  })
 
-const form = reactive({
-  id: null,
-  nome: '',
-  categoria: '',
-  preco: 0,
-  imagem: '',
-  file: null,
-})
+  const form = reactive({
+    id: null,
+    nome: '',
+    categoria: '',
+    preco: 0,
+    imagem: '',
+    file: null,
+  })
 
-const previewUrl = ref(null)
+  const previewUrl = ref(null)
 
-const snackbar = reactive({
-  show: false,
-  text: '',
-  color: 'success',
-})
+  const snackbar = reactive({
+    show: false,
+    text: '',
+    color: 'success',
+  })
 
-watch(() => form.file, file => {
-  previewUrl.value = file && file instanceof File ? URL.createObjectURL(file) : null
-})
+  watch(() => form.file, file => {
+    previewUrl.value = file && file instanceof File ? URL.createObjectURL(file) : null
+  })
 
-function abrirDialog(prato = null) {
-  if (prato) {
-    pratoEditando.value = prato
-    Object.assign(form, { ...prato, file: null })
-  } else {
-    pratoEditando.value = null
-    Object.assign(form, { id: null, nome: '', categoria: '', preco: 0, imagem: '', file: null })
+  function abrirDialog (prato = null) {
+    if (prato) {
+      pratoEditando.value = prato
+      Object.assign(form, { ...prato, file: null })
+    } else {
+      pratoEditando.value = null
+      Object.assign(form, { id: null, nome: '', categoria: '', preco: 0, imagem: '', file: null })
+    }
+    dialog.value = true
   }
-  dialog.value = true
-}
 
-function salvarPrato() {
-  if (pratoEditando.value) {
-    Object.assign(pratoEditando.value, { ...form, imagem: previewUrl.value || form.imagem })
-    mostrarSnackbar('Prato atualizado com sucesso!', 'success')
-  } else {
-    pratos.value.push({ ...form, id: Date.now(), imagem: previewUrl.value || form.imagem })
-    mostrarSnackbar('Prato adicionado com sucesso!', 'success')
+  function salvarPrato () {
+    if (pratoEditando.value) {
+      Object.assign(pratoEditando.value, { ...form, imagem: previewUrl.value || form.imagem })
+      mostrarSnackbar('Prato atualizado com sucesso!', 'success')
+    } else {
+      pratos.value.push({ ...form, id: Date.now(), imagem: previewUrl.value || form.imagem })
+      mostrarSnackbar('Prato adicionado com sucesso!', 'success')
+    }
+    dialog.value = false
+    previewUrl.value = null
   }
-  dialog.value = false
-  previewUrl.value = null
-}
 
-function removerPrato(prato) {
-  pratos.value = pratos.value.filter(p => p.id !== prato.id)
-  mostrarSnackbar('Prato removido com sucesso!', 'error')
-}
+  function removerPrato (prato) {
+    pratos.value = pratos.value.filter(p => p.id !== prato.id)
+    mostrarSnackbar('Prato removido com sucesso!', 'error')
+  }
 
-function abrirConfirm(prato) {
-  pratoSelecionado.value = prato
-  confirmDialog.value = true
-}
+  function abrirConfirm (prato) {
+    pratoSelecionado.value = prato
+    confirmDialog.value = true
+  }
 
-function mostrarSnackbar(text, color = 'success') {
-  snackbar.text = text
-  snackbar.color = color
-  snackbar.show = true
-}
+  function mostrarSnackbar (text, color = 'success') {
+    snackbar.text = text
+    snackbar.color = color
+    snackbar.show = true
+  }
 </script>
+
+<style scoped>
+</style>
