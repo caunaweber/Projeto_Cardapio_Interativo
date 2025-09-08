@@ -19,7 +19,7 @@
           <v-select
             v-model="filtro"
             hide-details
-            :items="['Todos', 'A Entregar', 'Entregue']"
+            :items="[ 'A Entregar', 'Todos', 'Entregue']"
             label="Filtrar por status"
             prepend-inner-icon="mdi-filter"
             rounded="xl"
@@ -64,7 +64,7 @@
   import KitchenCard from '@/components/KitchenCard.vue'
   import MenuAppBar from '@/components/MenuAppBar.vue'
 
-  const filtro = ref('Todos')
+  const filtro = ref('A Entregar')
   const search = ref('')
 
   const comandas = ref([

@@ -33,8 +33,8 @@
 
 .content-card {
   position: fixed;
-  bottom: 0px;
-  left: 0px;
+  bottom: 20px;
+  left: 10px;
 }
 
 .actions-card {
