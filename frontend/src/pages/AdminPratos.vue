@@ -22,7 +22,7 @@
 
     <v-container class="py-6">
       <v-row class="mb-4">
-        <v-col cols="12" md="10">
+        <v-col cols="12" md="9">
           <v-text-field
             v-model="search"
             hide-details
@@ -32,7 +32,7 @@
             variant="outlined"
           />
         </v-col>
-        <v-col cols="12" md="2">
+        <v-col cols="12" md="3">
           <v-select
             v-model="filtroCategoria"
             hide-details

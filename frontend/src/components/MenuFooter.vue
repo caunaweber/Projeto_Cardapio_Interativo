@@ -12,10 +12,6 @@
 </template>
 
 <script setup>
-  defineProps({
-    totalItens: { type: Number, default: 0 },
-    totalPreco: { type: Number, default: 0 },
-  })
   defineEmits(['action'])
 </script>
 
@@ -30,7 +26,6 @@
 .footer-card {
   pointer-events: all;
   padding: 5px 8px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   display: inline-flex;
   align-items: center;
   font-weight: bold;
