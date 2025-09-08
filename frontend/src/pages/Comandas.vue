@@ -1,18 +1,33 @@
 <template>
-  <MenuAppBar title="🍳 Restaurante - Gerenciamento de Comandas">
-    <template #actions>
-      <v-select
-        v-model="filtro"
-        density="compact"
-        hide-details
-        :items="['A Entregar', 'Entregue', 'Todos']"
-        style="max-width: 150px"
-        variant="outlined"
-      />
-    </template>
-  </MenuAppBar>
+  <MenuAppBar title="🍳 Restaurante - Gerenciamento de Comandas" />
 
-  <v-container class="py-6" fluid>
+  <v-container fluid>
+
+    <v-container>
+      <v-row>
+        <v-col cols="12" md="9">
+          <v-text-field
+            v-model="search"
+            hide-details
+            label="Pesquisar comandas por número..."
+            prepend-inner-icon="mdi-magnify"
+            rounded="xl"
+            variant="outlined"
+          />
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-select
+            v-model="filtro"
+            hide-details
+            :items="['Todos', 'A Entregar', 'Entregue']"
+            label="Filtrar por status"
+            prepend-inner-icon="mdi-filter"
+            rounded="xl"
+            variant="outlined"
+          />
+        </v-col>
+      </v-row>
+    </v-container>
     <h2 class="mb-6 text-h5 font-weight-bold text-primary border-b-md pb-4">
       Comandas <span v-if="filtro !== 'Todos'">- {{ filtro }}</span>
     </h2>
@@ -21,6 +36,7 @@
       <v-col
         v-for="comanda in comandasFiltradas"
         :key="comanda.mesa"
+        class="d-flex"
         cols="12"
         lg="3"
         md="4"
@@ -29,6 +45,7 @@
         <KitchenCard
           :action-color="comanda.acao.cor"
           :action-text="comanda.acao.texto"
+          class="flex-grow-1"
           :itens="comanda.itens"
           :mesa="comanda.mesa"
           :num="comanda.numero"
@@ -38,6 +55,7 @@
         />
       </v-col>
     </v-row>
+
   </v-container>
 </template>
 
@@ -46,7 +64,8 @@
   import KitchenCard from '@/components/KitchenCard.vue'
   import MenuAppBar from '@/components/MenuAppBar.vue'
 
-  const filtro = ref('A Entregar')
+  const filtro = ref('Todos')
+  const search = ref('')
 
   const comandas = ref([
     {
@@ -54,11 +73,15 @@
       status: 'A Entregar',
       numero: 101,
       itens: [
-        { qtd: 1, nome: 'prato 1' },
-        { qtd: 2, nome: 'entrada 2' },
-        { qtd: 1, nome: 'limonada' },
+        { qtd: 1, nome: 'Filé Mignon' },
+        { qtd: 2, nome: 'Batata Frita' },
+        { qtd: 1, nome: 'Coca-Cola' },
+        { qtd: 1, nome: 'Filé Mignon' },
+        { qtd: 2, nome: 'Batata Frita' },
+        { qtd: 1, nome: 'Coca-Cola' },
+        { qtd: 1, nome: 'Coca-Cola' },
       ],
-      tempo: '20:30',
+      tempo: '00:25',
       acao: { texto: 'Finalizar', cor: 'success' },
     },
     {
@@ -66,11 +89,10 @@
       status: 'Entregue',
       numero: 102,
       itens: [
-        { qtd: 1, nome: 'prato 1' },
-        { qtd: 1, nome: 'prato 2' },
-        { qtd: 2, nome: 'vinho' },
+        { qtd: 1, nome: 'Prato Executivo' },
+        { qtd: 1, nome: 'Suco Natural' },
       ],
-      tempo: '01:15',
+      tempo: '00:40',
       acao: { texto: 'Editar', cor: 'primary' },
     },
     {
@@ -78,11 +100,10 @@
       status: 'A Entregar',
       numero: 103,
       itens: [
-        { qtd: 1, nome: 'prato 1' },
-        { qtd: 2, nome: 'entrada 2' },
-        { qtd: 1, nome: 'limonada' },
+        { qtd: 2, nome: 'Pizza Calabresa' },
+        { qtd: 1, nome: 'Vinho Tinto' },
       ],
-      tempo: '20:30',
+      tempo: '00:15',
       acao: { texto: 'Finalizar', cor: 'success' },
     },
     {
@@ -90,66 +111,92 @@
       status: 'A Entregar',
       numero: 104,
       itens: [
-        { qtd: 1, nome: 'prato 1' },
-        { qtd: 2, nome: 'entrada 2' },
-        { qtd: 1, nome: 'limonada' },
+        { qtd: 1, nome: 'Salada Caesar' },
+        { qtd: 1, nome: 'Água com Gás' },
       ],
-      tempo: '20:30',
+      tempo: '00:10',
       acao: { texto: 'Finalizar', cor: 'success' },
     },
     {
       mesa: 5,
-      status: 'A Entregar',
+      status: 'Entregue',
       numero: 105,
       itens: [
-        { qtd: 1, nome: 'prato 1' },
-        { qtd: 2, nome: 'entrada 2' },
-        { qtd: 1, nome: 'limonada' },
+        { qtd: 3, nome: 'Hambúrguer Artesanal' },
+        { qtd: 3, nome: 'Refrigerante' },
       ],
-      tempo: '20:30',
-      acao: { texto: 'Finalizar', cor: 'success' },
+      tempo: '00:55',
+      acao: { texto: 'Editar', cor: 'primary' },
     },
     {
       mesa: 6,
-      status: 'Entregue',
+      status: 'A Entregar',
       numero: 106,
       itens: [
-        { qtd: 1, nome: 'prato 1' },
-        { qtd: 1, nome: 'prato 2' },
-        { qtd: 2, nome: 'vinho' },
+        { qtd: 1, nome: 'Sopa do Dia' },
+        { qtd: 2, nome: 'Pão de Alho' },
       ],
-      tempo: '01:15',
-      acao: { texto: 'Editar', cor: 'primary' },
+      tempo: '00:20',
+      acao: { texto: 'Finalizar', cor: 'success' },
     },
     {
       mesa: 7,
       status: 'Entregue',
       numero: 107,
       itens: [
-        { qtd: 1, nome: 'prato 1' },
-        { qtd: 1, nome: 'prato 2' },
-        { qtd: 2, nome: 'vinho' },
+        { qtd: 1, nome: 'Strogonoff de Frango' },
+        { qtd: 1, nome: 'Arroz Branco' },
+        { qtd: 1, nome: 'Suco de Uva' },
+      ],
+      tempo: '01:05',
+      acao: { texto: 'Editar', cor: 'primary' },
+    },
+    {
+      mesa: 8,
+      status: 'A Entregar',
+      numero: 108,
+      itens: [
+        { qtd: 2, nome: 'Espaguete à Bolonhesa' },
+        { qtd: 1, nome: 'Suco de Laranja' },
+      ],
+      tempo: '00:30',
+      acao: { texto: 'Finalizar', cor: 'success' },
+    },
+    {
+      mesa: 9,
+      status: 'Entregue',
+      numero: 109,
+      itens: [
+        { qtd: 1, nome: 'Sushi Combo' },
+        { qtd: 1, nome: 'Chá Verde' },
       ],
       tempo: '01:15',
       acao: { texto: 'Editar', cor: 'primary' },
     },
     {
-      mesa: 8,
-      status: 'Entregue',
-      numero: 108,
+      mesa: 10,
+      status: 'A Entregar',
+      numero: 110,
       itens: [
-        { qtd: 1, nome: 'prato 1' },
-        { qtd: 1, nome: 'prato 2' },
-        { qtd: 2, nome: 'vinho' },
+        { qtd: 1, nome: 'Feijoada' },
+        { qtd: 2, nome: 'Caipirinha' },
       ],
-      tempo: '01:15',
-      acao: { texto: 'Editar', cor: 'primary' },
+      tempo: '00:50',
+      acao: { texto: 'Finalizar', cor: 'success' },
     },
   ])
 
   const comandasFiltradas = computed(() => {
-    if (filtro.value === 'Todos') return comandas.value
-    return comandas.value.filter(c => c.status === filtro.value)
+    return comandas.value.filter(c => {
+      const passaFiltroStatus = filtro.value === 'Todos' || c.status === filtro.value
+      const termo = search.value.toLowerCase()
+      const passaFiltroSearch
+        = String(c.mesa).includes(termo)
+          || String(c.numero).includes(termo)
+          || c.itens.some(i => i.nome.toLowerCase().includes(termo))
+
+      return passaFiltroStatus && passaFiltroSearch
+    })
   })
 
   function atualizaStatus (comanda) {

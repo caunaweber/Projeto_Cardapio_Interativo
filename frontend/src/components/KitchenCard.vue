@@ -1,9 +1,10 @@
 <template>
   <v-card
-    class="pa-3 mb-4 menu-card-border"
+    class="pa-3 mb-4 menu-card-border d-flex flex-column"
     :color="cardColor"
     :elevation="elevation"
     rounded="xl"
+    style="min-height: 260px"
   >
     <div class="d-flex justify-space-between align-center mb-2">
       <div>
@@ -28,19 +29,19 @@
 
     <v-divider />
 
-    <v-list bg-color="transparent" density="compact">
-      <v-list-item
+    <div class="items-columns flex-grow-1" :style="columnsStyle">
+      <div
         v-for="(item, i) in itens"
         :key="i"
-        bg-color="transparent"
+        class="item-text"
       >
-        <v-list-item-title>{{ item.qtd }}x {{ item.nome }}</v-list-item-title>
-      </v-list-item>
-    </v-list>
+        {{ item.qtd }}x {{ item.nome }}
+      </div>
+    </div>
 
     <v-divider class="my-2" />
 
-    <div class="d-flex justify-end align-center">
+    <div class="mt-auto d-flex justify-end align-center">
       <span class="mr-2 font-weight-bold">{{ tempo }}</span>
       <v-icon size="20">mdi-timer-outline</v-icon>
     </div>
@@ -88,6 +89,7 @@
     const darkToken = props.bgColor || 'surface'
     return theme.global.current.value.colors[darkToken] || darkToken
   })
+
   const actionColorTheme = computed(
     () => theme.global.current.value.colors[props.actionColor] || props.actionColor,
   )
@@ -108,10 +110,33 @@
       }
     }
   })
+
+  const columnsStyle = computed(() => {
+    const totalItens = props.itens.length
+    const maxRows = 6
+    const colCount = Math.ceil(totalItens / maxRows) || 1
+    return {
+      columnCount: colCount,
+      columnGap: '0.5rem',
+    }
+  })
 </script>
 
-<style>
+<style scoped>
 .menu-card-border {
   border: 2px solid rgba(var(--v-theme-primary), 0.75);
+}
+
+.items-columns {
+  max-height: 8.5em;
+  overflow: hidden;
+}
+
+.item-text {
+  display: block;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 </style>
