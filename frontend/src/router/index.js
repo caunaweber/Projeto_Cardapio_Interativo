@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Default from '@/layouts/default.vue'
 
 import AdminMesas from '@/pages/AdminMesas.vue'
+import AdminMetricas from '@/pages/AdminMetricas.vue'
 import AdminPratos from '@/pages/AdminPratos.vue'
 import Cardapio from '@/pages/Cardapio.vue'
 import Comandas from '@/pages/Comandas.vue'
@@ -35,6 +36,11 @@ const routes = [
         path: 'mesas',
         name: 'AdminMesas',
         component: AdminMesas,
+      },
+      {
+        path: 'metricas',
+        name: 'AdminMetricas',
+        component: AdminMetricas,
       },
     ],
   },

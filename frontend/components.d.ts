@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    BarChart: typeof import('./src/components/BarChart.vue')['default']
     ConfirmDialog: typeof import('./src/components/ConfirmDialog.vue')['default']
     KitchenCard: typeof import('./src/components/KitchenCard.vue')['default']
     MenuAppBar: typeof import('./src/components/MenuAppBar.vue')['default']
@@ -15,7 +16,9 @@ declare module 'vue' {
     MenuDialog: typeof import('./src/components/MenuDialog.vue')['default']
     MenuFooter: typeof import('./src/components/MenuFooter.vue')['default']
     MenuSidebar: typeof import('./src/components/MenuSidebar.vue')['default']
+    MetricCard: typeof import('./src/components/MetricCard.vue')['default']
     NavSidebar: typeof import('./src/components/NavSidebar.vue')['default']
+    PieChart: typeof import('./src/components/PieChart.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ThemeToggle: typeof import('./src/components/ThemeToggle.vue')['default']

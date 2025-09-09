@@ -57,5 +57,6 @@
   const links = [
     { title: 'Gerenciamento de Pratos', value: 'pratos', to: '/admin/pratos', icon: 'mdi-silverware-fork-knife' },
     { title: 'Gerenciamento de Mesas', value: 'mesas', to: '/admin/mesas', icon: 'mdi-table-chair' },
+    { title: 'Métricas de administração', value: 'metricas', to: '/admin/metricas', icon: 'mdi-chart-bar' },
   ]
 </script>
