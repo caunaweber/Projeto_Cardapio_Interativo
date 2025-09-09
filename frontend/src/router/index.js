@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import Default from '@/layouts/default.vue'
 
+import AdminLogin from '@/pages/AdminLogin.vue'
 import AdminMesas from '@/pages/AdminMesas.vue'
 import AdminMetricas from '@/pages/AdminMetricas.vue'
 import AdminPratos from '@/pages/AdminPratos.vue'
@@ -20,6 +21,11 @@ const routes = [
       { path: '/comandas',
         name: 'Comandas',
         component: Comandas,
+      },
+      {
+        path: '/login',
+        name: 'Login',
+        component: AdminLogin,
       },
     ],
   },

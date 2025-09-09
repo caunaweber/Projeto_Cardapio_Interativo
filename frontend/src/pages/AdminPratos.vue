@@ -64,6 +64,10 @@
           R$ {{ Number(item.preco).toFixed(2) }}
         </template>
 
+        <template #item.vendas="{ item }">
+          <span>{{ item.vendas }}</span>
+        </template>
+
         <template #item.acoes="{ item }">
           <v-btn
             color="primary"
@@ -147,17 +151,12 @@
       @confirm="removerPrato(pratoSelecionado)"
     />
 
-    <NavSidebar v-model="drawer" :pagina-atual="'pratos'" @logout="logout" />
+    <NavSidebar v-model="drawer" :pagina-atual="'pratos'" />
 
   </v-container>
 </template>
 
 <script setup>
-  import { computed, reactive, ref, watch } from 'vue'
-  import ConfirmDialog from '@/components/ConfirmDialog.vue'
-  import MenuAppBar from '@/components/MenuAppBar.vue'
-  import MenuDialog from '@/components/MenuDialog.vue'
-
   const confirmDialog = ref(false)
   const pratoSelecionado = ref(null)
   const dialog = ref(false)
@@ -171,15 +170,16 @@
     { title: 'Nome', key: 'nome' },
     { title: 'Categoria', key: 'categoria' },
     { title: 'Preço', key: 'preco', align: 'end' },
+    { title: 'Vendas', key: 'vendas', align: 'center' },
     { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
   ]
 
   const categorias = ['Entrada', 'Prato Principal', 'Bebida', 'Sobremesa']
 
   const pratos = ref([
-    { id: 1, nome: 'Prato 1', categoria: 'Prato Principal', preco: 25, imagem: 'image.png' },
-    { id: 2, nome: 'Suco de Laranja', categoria: 'Bebida', preco: 12, imagem: 'suco.png' },
-    { id: 3, nome: 'Petit Gateau', categoria: 'Sobremesa', preco: 20 },
+    { id: 1, nome: 'Prato 1', categoria: 'Prato Principal', preco: 25, imagem: 'image.png', vendas: 120 },
+    { id: 2, nome: 'Suco de Laranja', categoria: 'Bebida', preco: 12, imagem: 'suco.png', vendas: 80 },
+    { id: 3, nome: 'Petit Gateau', categoria: 'Sobremesa', preco: 20, vendas: 60 },
   ])
 
   const pratosFiltrados = computed(() => {
@@ -224,7 +224,7 @@
       Object.assign(pratoEditando.value, { ...form, imagem: previewUrl.value || form.imagem })
       mostrarSnackbar('Prato atualizado com sucesso!', 'success')
     } else {
-      pratos.value.push({ ...form, id: Date.now(), imagem: previewUrl.value || form.imagem })
+      pratos.value.push({ ...form, id: Date.now(), imagem: previewUrl.value || form.imagem, vendas: 0 })
       mostrarSnackbar('Prato adicionado com sucesso!', 'success')
     }
     dialog.value = false

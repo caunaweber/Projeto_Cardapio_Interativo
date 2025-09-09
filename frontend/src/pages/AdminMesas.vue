@@ -14,7 +14,7 @@
       </template>
     </MenuAppBar>
 
-    <NavSidebar v-model="drawer" :pagina-atual="'mesas'" @logout="logout" />
+    <NavSidebar v-model="drawer" :pagina-atual="'mesas'" />
 
     <v-container class="py-6">
       <v-row class="mb-4">
@@ -175,10 +175,6 @@
     snackbar.text = text
     snackbar.color = color
     snackbar.show = true
-  }
-
-  function logout () {
-    console.log('Logout acionado')
   }
 
   const snackbar = reactive({ show: false, text: '', color: 'success' })

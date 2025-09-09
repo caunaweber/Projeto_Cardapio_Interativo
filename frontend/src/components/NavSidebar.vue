@@ -32,7 +32,7 @@
         prepend-icon="mdi-logout"
         rounded="xl"
         title="Sair"
-        @click="$emit('logout')"
+        @click="handleLogout"
       />
     </template>
   </v-navigation-drawer>
@@ -40,6 +40,9 @@
 
 <script setup>
   import { ref, watch } from 'vue'
+  import { useRouter } from 'vue-router'
+
+  const router = useRouter()
 
   const props = defineProps({
     paginaAtual: String,
@@ -59,4 +62,8 @@
     { title: 'Gerenciamento de Mesas', value: 'mesas', to: '/admin/mesas', icon: 'mdi-table-chair' },
     { title: 'Métricas de administração', value: 'metricas', to: '/admin/metricas', icon: 'mdi-chart-bar' },
   ]
+
+  function handleLogout () {
+    router.push('/login')
+  }
 </script>

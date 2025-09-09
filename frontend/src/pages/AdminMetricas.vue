@@ -8,7 +8,7 @@
       </template>
     </MenuAppBar>
 
-    <NavSidebar v-model="drawer" :pagina-atual="'metricas'" @logout="logout" />
+    <NavSidebar v-model="drawer" :pagina-atual="'metricas'" />
 
     <v-container class="py-6" fluid>
       <v-row class="pb-4 " dense>
@@ -77,10 +77,6 @@
   import PieChart from '@/components/PieChart.vue'
 
   const drawer = ref(false)
-
-  function logout () {
-    console.log('Logout acionado')
-  }
 
   const maisVendidos = {
     pratos: [
