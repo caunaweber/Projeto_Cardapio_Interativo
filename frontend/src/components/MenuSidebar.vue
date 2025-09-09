@@ -33,7 +33,7 @@
                 icon
                 size="small"
                 variant="text"
-                @click="$emit('remover', item)"
+                @click="$emit('remover', item.id)"
               >
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
