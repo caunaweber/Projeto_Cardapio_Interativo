@@ -32,10 +32,10 @@
         <v-col
           v-for="(categoria, i) in metricasMaisVendidas"
           :key="i"
-          class="pb-4"
           cols="12"
           lg="3"
           md="6"
+          sm="12"
         >
           <MetricCard
             class="hover-card"
@@ -50,10 +50,10 @@
         <v-col
           v-for="(categoria, i) in metricasMenosVendidas"
           :key="i"
-          class="pt-4"
           cols="12"
           lg="3"
           md="6"
+          sm="12"
         >
           <MetricCard
             class="hover-card"

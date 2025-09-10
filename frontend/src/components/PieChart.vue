@@ -18,8 +18,19 @@
     maintainAspectRatio: false,
     plugins: {
       legend: { position: 'bottom' },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            const dataset = context.dataset;
+            const total = dataset.data.reduce((acc, val) => acc + val, 0);
+            const value = dataset.data[context.dataIndex];
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${context.label}: ${percentage}%`;
+          },
+        },
+      },
     },
-  }
+  };
 </script>
 
 <style scoped>

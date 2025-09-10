@@ -1,11 +1,13 @@
 <template>
-  <v-card class="pa-4 rounded-xl elevation-2 card-border" min-height="180px">
-    <v-card-title class="font-weight-bold text-h6 d-flex align-center justify-space-between">
+  <v-card class="pa-2 rounded-xl elevation-2 card-border" min-height="180px">
+    <v-card-title class="font-weight-bold d-flex align-center justify-space-between card-title">
       <span>{{ title }}</span>
       <v-icon :color="iconColor">{{ icon }}</v-icon>
     </v-card-title>
 
-    <v-subheader class="mb-2">Total: <strong>{{ total }}</strong> vendas</v-subheader>
+    <v-subheader class="mb-2">
+      Total: <strong>{{ total }}</strong> vendas
+    </v-subheader>
 
     <v-divider class="my-2" />
 
@@ -35,7 +37,12 @@
 </script>
 
 <style scoped>
-.card-border {
-  border: 2px solid rgba(var(--v-theme-primary), 0.75);
-}
+  .card-border {
+    border: 2px solid rgba(var(--v-theme-primary), 0.75);
+  }
+
+  .card-title {
+    font-size: clamp(0.85rem, 1vw + 0.6rem, 1rem);
+    line-height: 1.2;
+  }
 </style>
