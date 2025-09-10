@@ -42,10 +42,17 @@
           Mesa {{ item.numero }}
         </template>
 
-        <template #item.status="{ item }">
-          <v-chip :color="item.status === 'Ocupada' ? 'error' : 'success'" dark>
-            {{ item.status }}
+        <template #item.IDvinc="{ item }">
+          <v-chip
+            v-if="item.IDvinc !== 'Indefinido'"
+            color="primary"
+            size="small"
+            text-color="white"
+            variant="outlined"
+          >
+            {{ item.IDvinc }}
           </v-chip>
+          <span v-else>Indefinido</span>
         </template>
 
         <template #item.acoes="{ item }">
@@ -80,9 +87,9 @@
         <v-form ref="formRef">
           <v-text-field v-model.number="form.numero" label="Número da mesa" required type="number" />
           <v-select
-            v-model="form.status"
-            :items="['Disponível', 'Ocupada']"
-            label="Status"
+            v-model="form.IDvinc"
+            :items="['Indefinido', '#1', '#2', '#3', '#4', '#5']"
+            label="Identificador Vinculado"
             required
           />
         </v-form>
@@ -117,26 +124,30 @@
   const mesaSelecionada = ref(null)
 
   const mesas = ref([
-    { id: 1, numero: 1, status: 'Disponível' },
-    { id: 2, numero: 2, status: 'Ocupada' },
-    { id: 3, numero: 3, status: 'Disponível' },
+    { id: 1, numero: 1, IDvinc: '#1' },
+    { id: 2, numero: 2, IDvinc: '#2' },
+    { id: 3, numero: 3, IDvinc: '#3' },
   ])
 
   const headers = [
     { title: 'Número', key: 'numero' },
-    { title: 'Status', key: 'status', align: 'center' },
+    { title: 'ID vinculado', key: 'IDvinc', align: 'center' },
     { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
   ]
 
   const mesasFiltradas = computed(() => {
     if (!search.value) return mesas.value
-    return mesas.value.filter(m => m.numero.toString().includes(search.value))
+    const termo = search.value.toLowerCase()
+    return mesas.value.filter(m =>
+      m.numero.toString().includes(termo)
+      || m.IDvinc.toLowerCase().includes(termo),
+    )
   })
 
   const form = reactive({
     id: null,
     numero: null,
-    status: 'Disponível',
+    IDvinc: 'Indefinido',
   })
 
   function abrirDialog (mesa = null) {
@@ -145,7 +156,7 @@
       Object.assign(form, mesa)
     } else {
       mesaEditando.value = null
-      Object.assign(form, { id: null, numero: null, status: 'Disponível' })
+      Object.assign(form, { id: null, numero: null, IDvinc: 'Indefinido' })
     }
     dialog.value = true
   }

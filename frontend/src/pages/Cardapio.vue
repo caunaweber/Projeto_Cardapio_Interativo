@@ -2,6 +2,12 @@
   <v-container class="menu-bg" fluid>
 
     <MenuAppBar title="🍴 Restaurante - Cardápio" @toggle-drawer="drawer = !drawer">
+      <template #title-side>
+        <span class="text-caption text-medium-emphasis ml-4">
+          Aparelho não configurado ID: #{{ 12 }}
+        </span>
+      </template>
+
       <template #actions="{ toggleDrawer }">
         <v-btn
           class="font-weight-bold"

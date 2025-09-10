@@ -16,6 +16,8 @@
       </span>
     </div>
 
+    <slot name="title-side" />
+
     <v-spacer />
 
     <div class="d-flex align-center">
