@@ -2,7 +2,6 @@
   <MenuAppBar title="🍳 Restaurante - Gerenciamento de Comandas" />
 
   <v-container fluid>
-
     <v-container>
       <v-row>
         <v-col cols="12" md="9">
@@ -28,6 +27,7 @@
         </v-col>
       </v-row>
     </v-container>
+
     <h2 class="mb-6 text-h5 font-weight-bold text-primary border-b-md pb-4">
       Comandas <span v-if="filtro !== 'Todos'">- {{ filtro }}</span>
     </h2>
@@ -56,6 +56,49 @@
       </v-col>
     </v-row>
 
+    <v-dialog v-model="dialogEditar" max-width="600px">
+      <v-card>
+        <v-card-title class="text-h6 font-weight-bold">
+          Editar Comanda #{{ comandaEditando?.numero }}
+        </v-card-title>
+
+        <v-divider />
+
+        <v-card-text>
+          <v-row v-for="(item, i) in comandaEditando?.itens" :key="i" class="mb-2" dense>
+            <v-col cols="10">
+              <v-text-field
+                v-model="item.nome"
+                dense
+                hide-details
+                label="Produto"
+                variant="outlined"
+              />
+            </v-col>
+
+            <v-col cols="2">
+              <v-text-field
+                v-model="item.qtd"
+                dense
+                hide-details
+                label="Qtd"
+                type="number"
+                variant="outlined"
+              />
+            </v-col>
+          </v-row>
+        </v-card-text>
+
+        <v-divider />
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="error" text @click="dialogEditar = false">Cancelar</v-btn>
+          <v-btn color="primary" @click="salvarEdicao">Salvar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -67,6 +110,9 @@
   const filtro = ref('A Entregar')
   const search = ref('')
 
+  const dialogEditar = ref(false)
+  const comandaEditando = ref(null)
+
   const comandas = ref([
     {
       mesa: 1,
@@ -75,10 +121,6 @@
       itens: [
         { qtd: 1, nome: 'Filé Mignon' },
         { qtd: 2, nome: 'Batata Frita' },
-        { qtd: 1, nome: 'Coca-Cola' },
-        { qtd: 1, nome: 'Filé Mignon' },
-        { qtd: 2, nome: 'Batata Frita' },
-        { qtd: 1, nome: 'Coca-Cola' },
         { qtd: 1, nome: 'Coca-Cola' },
       ],
       tempo: '00:25',
@@ -94,95 +136,6 @@
       ],
       tempo: '00:40',
       acao: { texto: 'Editar', cor: 'primary' },
-    },
-    {
-      mesa: 3,
-      status: 'A Entregar',
-      numero: 103,
-      itens: [
-        { qtd: 2, nome: 'Pizza Calabresa' },
-        { qtd: 1, nome: 'Vinho Tinto' },
-      ],
-      tempo: '00:15',
-      acao: { texto: 'Finalizar', cor: 'success' },
-    },
-    {
-      mesa: 4,
-      status: 'A Entregar',
-      numero: 104,
-      itens: [
-        { qtd: 1, nome: 'Salada Caesar' },
-        { qtd: 1, nome: 'Água com Gás' },
-      ],
-      tempo: '00:10',
-      acao: { texto: 'Finalizar', cor: 'success' },
-    },
-    {
-      mesa: 5,
-      status: 'Entregue',
-      numero: 105,
-      itens: [
-        { qtd: 3, nome: 'Hambúrguer Artesanal' },
-        { qtd: 3, nome: 'Refrigerante' },
-      ],
-      tempo: '00:55',
-      acao: { texto: 'Editar', cor: 'primary' },
-    },
-    {
-      mesa: 6,
-      status: 'A Entregar',
-      numero: 106,
-      itens: [
-        { qtd: 1, nome: 'Sopa do Dia' },
-        { qtd: 2, nome: 'Pão de Alho' },
-      ],
-      tempo: '00:20',
-      acao: { texto: 'Finalizar', cor: 'success' },
-    },
-    {
-      mesa: 7,
-      status: 'Entregue',
-      numero: 107,
-      itens: [
-        { qtd: 1, nome: 'Strogonoff de Frango' },
-        { qtd: 1, nome: 'Arroz Branco' },
-        { qtd: 1, nome: 'Suco de Uva' },
-      ],
-      tempo: '01:05',
-      acao: { texto: 'Editar', cor: 'primary' },
-    },
-    {
-      mesa: 8,
-      status: 'A Entregar',
-      numero: 108,
-      itens: [
-        { qtd: 2, nome: 'Espaguete à Bolonhesa' },
-        { qtd: 1, nome: 'Suco de Laranja' },
-      ],
-      tempo: '00:30',
-      acao: { texto: 'Finalizar', cor: 'success' },
-    },
-    {
-      mesa: 9,
-      status: 'Entregue',
-      numero: 109,
-      itens: [
-        { qtd: 1, nome: 'Sushi Combo' },
-        { qtd: 1, nome: 'Chá Verde' },
-      ],
-      tempo: '01:15',
-      acao: { texto: 'Editar', cor: 'primary' },
-    },
-    {
-      mesa: 10,
-      status: 'A Entregar',
-      numero: 110,
-      itens: [
-        { qtd: 1, nome: 'Feijoada' },
-        { qtd: 2, nome: 'Caipirinha' },
-      ],
-      tempo: '00:50',
-      acao: { texto: 'Finalizar', cor: 'success' },
     },
   ])
 
@@ -204,8 +157,21 @@
       comanda.status = 'Entregue'
       comanda.acao = { texto: 'Editar', cor: 'primary' }
     } else if (comanda.status === 'Entregue') {
-      comanda.status = 'A Entregar'
-      comanda.acao = { texto: 'Finalizar', cor: 'success' }
+      // eslint-disable-next-line unicorn/prefer-structured-clone
+      comandaEditando.value = JSON.parse(JSON.stringify(comanda))
+      dialogEditar.value = true
     }
+  }
+
+  function salvarEdicao () {
+    if (comandaEditando.value) {
+      const i = comandas.value.findIndex(c => c.numero === comandaEditando.value.numero)
+      if (i !== -1) {
+        comandas.value[i].itens = comandaEditando.value.itens
+        comandas.value[i].status = 'A Entregar'
+        comandas.value[i].acao = { texto: 'Finalizar', cor: 'success' }
+      }
+    }
+    dialogEditar.value = false
   }
 </script>
