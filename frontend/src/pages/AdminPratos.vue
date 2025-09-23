@@ -55,7 +55,7 @@
       >
         <template #item.imagem="{ item }">
           <v-avatar class="my-1" rounded size="70">
-            <v-img :src="item.imagem ? '/' + item.imagem : '/no-image.png'" />
+            <v-img :src="getImageSrc(item.imagem)" />
 
           </v-avatar>
         </template>
@@ -124,11 +124,6 @@
             prepend-icon="mdi-image"
           />
 
-          <div v-if="form.file" class="mt-4 text-center">
-            <v-avatar rounded size="120">
-              <v-img :src="previewUrl" />
-            </v-avatar>
-          </div>
         </v-form>
       </template>
 
@@ -157,6 +152,8 @@
 </template>
 
 <script setup>
+  import { computed, reactive, ref, watch } from 'vue'
+
   const confirmDialog = ref(false)
   const pratoSelecionado = ref(null)
   const dialog = ref(false)
@@ -179,7 +176,7 @@
   const pratos = ref([
     { id: 1, nome: 'Prato 1', categoria: 'Prato Principal', preco: 25, imagem: 'image.png', vendas: 120 },
     { id: 2, nome: 'Suco de Laranja', categoria: 'Bebida', preco: 12, imagem: 'suco.png', vendas: 80 },
-    { id: 3, nome: 'Petit Gateau', categoria: 'Sobremesa', preco: 20, vendas: 60 },
+    { id: 3, nome: 'Petit Gateau', categoria: 'Sobremesa', preco: 20, imagem: '', vendas: 60 },
   ])
 
   const pratosFiltrados = computed(() => {
@@ -205,30 +202,53 @@
   })
 
   watch(() => form.file, file => {
-    previewUrl.value = file && file instanceof File ? URL.createObjectURL(file) : null
+    if (file && file instanceof File) {
+      const reader = new FileReader()
+      reader.addEventListener('load', e => {
+        previewUrl.value = e.target.result
+      })
+      reader.readAsDataURL(file)
+    } else {
+      previewUrl.value = null
+    }
   })
+
+  function getImageSrc (imagem) {
+    if (!imagem) return '/no-image.png'
+    if (typeof imagem !== 'string') return '/no-image.png'
+    if (imagem.startsWith('data:') || imagem.startsWith('blob:') || imagem.startsWith('/') || imagem.startsWith('http')) {
+      return imagem
+    }
+    return '/' + imagem
+  }
 
   function abrirDialog (prato = null) {
     if (prato) {
       pratoEditando.value = prato
       Object.assign(form, { ...prato, file: null })
+      previewUrl.value = prato.imagem || null
     } else {
       pratoEditando.value = null
       Object.assign(form, { id: null, nome: '', categoria: '', preco: 0, imagem: '', file: null })
+      previewUrl.value = null
     }
     dialog.value = true
   }
 
   function salvarPrato () {
+    const imagemSalva = previewUrl.value || form.imagem || '/no-image.png'
+
     if (pratoEditando.value) {
-      Object.assign(pratoEditando.value, { ...form, imagem: previewUrl.value || form.imagem })
+      Object.assign(pratoEditando.value, { ...form, imagem: imagemSalva })
       mostrarSnackbar('Prato atualizado com sucesso!', 'success')
     } else {
-      pratos.value.push({ ...form, id: Date.now(), imagem: previewUrl.value || form.imagem, vendas: 0 })
+      pratos.value.push({ ...form, id: Date.now(), imagem: imagemSalva, vendas: 0 })
       mostrarSnackbar('Prato adicionado com sucesso!', 'success')
     }
+
     dialog.value = false
     previewUrl.value = null
+    form.file = null
   }
 
   function removerPrato (prato) {
