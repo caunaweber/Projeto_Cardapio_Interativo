@@ -1,6 +1,5 @@
 <template>
   <v-container class="menu-bg" fluid>
-
     <MenuAppBar title="🍴 Restaurante - Cardápio" @toggle-drawer="drawer = !drawer">
       <template #title-side>
         <span class="text-caption text-medium-emphasis ml-4">
@@ -37,7 +36,7 @@
           <v-select
             v-model="filtroCategoria"
             hide-details
-            :items="categoriasNomes"
+            :items="cardapio.categoriasNomes"
             label="Filtrar por categoria"
             prepend-inner-icon="mdi-filter"
             rounded="xl"
@@ -73,9 +72,9 @@
     <MenuSidebar
       v-model="drawer"
       action-text="Finalizar pedido"
-      :items="pedidos"
+      :items="carrinho.pedidos"
       title="🛒 Meus Pedidos"
-      :total-preco="totalPreco"
+      :total-preco="carrinho.totalPreco"
       @finalizar="dialogConfirmar = true"
       @remover="remover"
     />
@@ -84,7 +83,7 @@
       <template #title>✅ Confirmar Pedido</template>
       <template #default>
         <v-list>
-          <v-list-item v-for="produto in pedidos" :key="produto.id">
+          <v-list-item v-for="produto in carrinho.pedidos" :key="produto.id">
             <v-list-item-title>{{ produto.nome }}</v-list-item-title>
             <v-list-item-subtitle>
               {{ produto.qtd }}x - R$ {{ (produto.qtd * produto.preco).toFixed(2) }}
@@ -93,7 +92,7 @@
         </v-list>
         <v-divider class="my-2" />
         <div class="text-right font-weight-bold text-subtitle-1">
-          Total: R$ {{ totalPreco.toFixed(2) }}
+          Total: R$ {{ carrinho.totalPreco.toFixed(2) }}
         </div>
       </template>
       <template #actions>
@@ -102,7 +101,7 @@
       </template>
     </MenuDialog>
 
-    <MenuFooter :total-itens="totalItens" :total-preco="totalPreco" @action="dialogConfirmar = true">
+    <MenuFooter :total-itens="carrinho.totalItens" :total-preco="carrinho.totalPreco" @action="dialogConfirmar = true">
       <template #content>
         <v-btn
           color="primary"
@@ -136,53 +135,38 @@
     >
       ✅ Pedido enviado para a cozinha!
     </v-snackbar>
+
+    <v-snackbar
+      v-model="snackbarDanger"
+      color="primary"
+      elevation="4"
+      rounded="xl"
+      timeout="2500"
+    >
+      Não há pedidos no carrinho!
+    </v-snackbar>
   </v-container>
 </template>
 
 <script setup>
+  import { computed, ref } from 'vue'
+  import { useCardapioStore } from '@/stores/cardapioStore'
+  import { useCarrinhoStore } from '@/stores/carrinhoStore'
+  import { useComandaStore } from '@/stores/comandaStore'
+
   const drawer = ref(false)
   const dialogConfirmar = ref(false)
   const search = ref('')
   const filtroCategoria = ref('Todas')
   const snackbar = ref(false)
+  const snackbarDanger = ref(false)
 
-  const categorias = ref([
-    { nome: 'Entradas', itens: [
-      { id: 1, nome: 'Salada Caesar', preco: 12.5, imagem: 'entrada.png' },
-      { id: 2, nome: 'Bruschetta', preco: 9, imagem: 'entrada.png' },
-      { id: 8, nome: 'Carpaccio de Carne', preco: 18, imagem: 'entrada.png' },
-      { id: 9, nome: 'Tábua de Queijos', preco: 22, imagem: 'entrada.png' },
-    ] },
-    { nome: 'Pratos Principais', itens: [
-      { id: 3, nome: 'Filé Mignon', preco: 35, imagem: 'prato.png' },
-      { id: 4, nome: 'Strogonoff de Frango', preco: 28, imagem: 'prato.png' },
-      { id: 10, nome: 'Risoto de Cogumelos', preco: 30, imagem: 'prato.png' },
-      { id: 11, nome: 'Lasanha à Bolonhesa', preco: 26, imagem: 'prato.png' },
-      { id: 12, nome: 'Peixe Grelhado com Legumes', preco: 32, imagem: 'prato.png' },
-      { id: 13, nome: 'Frango à Parmegiana', preco: 27, imagem: 'prato.png' },
-    ] },
-    { nome: 'Bebidas', itens: [
-      { id: 5, nome: 'Suco Natural', preco: 7.5, imagem: 'suco.png' },
-      { id: 6, nome: 'Coca-Cola', preco: 5, imagem: 'suco.png' },
-      { id: 14, nome: 'Água com Gás', preco: 4, imagem: 'suco.png' },
-      { id: 15, nome: 'Vinho Tinto Taça', preco: 18, imagem: 'suco.png' },
-      { id: 16, nome: 'Cerveja Artesanal', preco: 12, imagem: 'suco.png' },
-      { id: 17, nome: 'Chá Gelado', preco: 6.5, imagem: 'suco.png' },
-    ] },
-    { nome: 'Sobremesas', itens: [
-      { id: 18, nome: 'Petit Gâteau', preco: 15, imagem: 'sobremesa.png' },
-      { id: 19, nome: 'Cheesecake de Frutas Vermelhas', preco: 14, imagem: 'sobremesa.png' },
-      { id: 20, nome: 'Pudim de Leite', preco: 10, imagem: 'sobremesa.png' },
-      { id: 21, nome: 'Torta de Limão', preco: 12, imagem: 'sobremesa.png' },
-      { id: 22, nome: 'Brownie com Sorvete', preco: 16, imagem: 'sobremesa.png' },
-      { id: 23, nome: 'Mousse de Maracujá', preco: 11, imagem: 'sobremesa.png' },
-    ] },
-  ])
-
-  const categoriasNomes = computed(() => ['Todas', ...categorias.value.map(c => c.nome)])
+  const cardapio = useCardapioStore()
+  const carrinho = useCarrinhoStore()
+  const comanda = useComandaStore()
 
   const categoriasFiltradas = computed(() => {
-    return categorias.value.map(c => {
+    return cardapio.categorias.map(c => {
       const itensFiltrados = c.itens.filter(p => {
         const passaCategoria = filtroCategoria.value === 'Todas' || c.nome === filtroCategoria.value
         const termo = search.value.toLowerCase()
@@ -192,32 +176,27 @@
     }).filter(c => c.itensFiltrados.length > 0)
   })
 
-  const pedidos = ref([])
-  const totalPreco = computed(() => pedidos.value.reduce((sum, p) => sum + p.qtd * p.preco, 0))
-  const totalItens = computed(() => pedidos.value.reduce((sum, p) => sum + p.qtd, 0))
-
   function adicionar (id) {
-    const produto = categorias.value.flatMap(c => c.itens).find(p => p.id === id)
-    const item = pedidos.value.find(p => p.id === id)
-    if (item) item.qtd++
-    else pedidos.value.push({ ...produto, qtd: 1 })
+    carrinho.adicionar(id, cardapio.categorias)
   }
 
   function remover (id) {
-    const index = pedidos.value.findIndex(p => p.id === id)
-    if (index !== -1) {
-      if (pedidos.value[index].qtd > 1) pedidos.value[index].qtd--
-      else pedidos.value.splice(index, 1)
-    }
+    carrinho.remover(id)
   }
 
   function getQtdProduto (id) {
-    const item = pedidos.value.find(p => p.id === id)
-    return item ? item.qtd : 0
+    return carrinho.getQtdProduto(id)
   }
 
   function confirmarPedido () {
-    pedidos.value = []
+    if (carrinho.pedidos.length === 0) return snackbarDanger.value = true
+
+    console.log(comanda)
+    console.log(typeof comanda.criarComanda)
+
+    comanda.criarComanda(carrinho.pedidos)
+    carrinho.confirmarPedido()
+
     dialogConfirmar.value = false
     snackbar.value = true
   }
@@ -225,5 +204,4 @@
   function scrollToTop () {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
-
 </script>
