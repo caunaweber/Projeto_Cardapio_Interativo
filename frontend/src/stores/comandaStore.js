@@ -178,14 +178,16 @@ export const useComandaStore = defineStore('comanda', {
   actions: {
     criarComanda (itens) {
       const numero = this.comandas.length + 101
-      this.comandas.push({
+      const nova = {
         mesa: this.comandas.length + 1,
         numero,
         status: 'A Entregar',
         itens,
         tempo: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         acao: { texto: 'Finalizar', cor: 'success' },
-      })
+      }
+      console.log('Nova comanda criada:', nova)
+      this.comandas.push(nova)
     },
     atualizarStatus (numero, novoStatus) {
       const comanda = this.comandas.find(c => c.numero === numero)
