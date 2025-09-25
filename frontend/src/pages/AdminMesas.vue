@@ -115,78 +115,85 @@
 </template>
 
 <script setup>
+import { ref, reactive, computed } from 'vue'
+import { useMesasStore } from '@/stores/mesasStore'
 
-  const drawer = ref(false)
-  const search = ref('')
-  const dialog = ref(false)
-  const mesaEditando = ref(null)
-  const confirmDialog = ref(false)
-  const mesaSelecionada = ref(null)
+const drawer = ref(false)
+const search = ref('')
+const dialog = ref(false)
+const mesaEditando = ref(null)
+const confirmDialog = ref(false)
+const mesaSelecionada = ref(null)
 
-  const mesas = ref([
-    { id: 1, numero: 1, IDvinc: '#1' },
-    { id: 2, numero: 2, IDvinc: '#2' },
-    { id: 3, numero: 3, IDvinc: '#3' },
-  ])
+const mesasStore = useMesasStore()
 
-  const headers = [
-    { title: 'Número', key: 'numero' },
-    { title: 'ID vinculado', key: 'IDvinc', align: 'center' },
-    { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
-  ]
+const headers = [
+  { title: 'Número', key: 'numero' },
+  { title: 'ID vinculado', key: 'IDvinc', align: 'center' },
+  { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
+]
 
-  const mesasFiltradas = computed(() => {
-    if (!search.value) return mesas.value
-    const termo = search.value.toLowerCase()
-    return mesas.value.filter(m =>
-      m.numero.toString().includes(termo)
-      || m.IDvinc.toLowerCase().includes(termo),
-    )
-  })
+const mesasFiltradas = computed(() => {
+  if (!search.value) return mesasStore.mesas
+  const termo = search.value.toLowerCase()
+  return mesasStore.mesas.filter(m =>
+    m.numero.toString().includes(termo) ||
+    m.IDvinc.toLowerCase().includes(termo),
+  )
+})
 
-  const form = reactive({
-    id: null,
-    numero: null,
-    IDvinc: 'Indefinido',
-  })
+const formRef = ref(null)
 
-  function abrirDialog (mesa = null) {
-    if (mesa) {
-      mesaEditando.value = mesa
-      Object.assign(form, mesa)
-    } else {
-      mesaEditando.value = null
-      Object.assign(form, { id: null, numero: null, IDvinc: 'Indefinido' })
-    }
-    dialog.value = true
+const form = reactive({
+  id: null,
+  numero: null,
+  IDvinc: 'Indefinido',
+})
+
+function abrirDialog(mesa = null) {
+  if (mesa) {
+    mesaEditando.value = mesa
+    Object.assign(form, mesa)
+  } else {
+    mesaEditando.value = null
+    Object.assign(form, { id: null, numero: null, IDvinc: 'Indefinido' })
+  }
+  dialog.value = true
+}
+
+async function salvarMesa() {
+  const isValid = await formRef.value?.validate()
+  if (!isValid) {
+    mostrarSnackbar('Preencha todos os campos obrigatórios!', 'error')
+    return
   }
 
-  function salvarMesa () {
-    if (mesaEditando.value) {
-      Object.assign(mesaEditando.value, form)
-      mostrarSnackbar('Mesa atualizada com sucesso!', 'success')
-    } else {
-      mesas.value.push({ ...form, id: Date.now() })
-      mostrarSnackbar('Mesa adicionada com sucesso!', 'success')
-    }
-    dialog.value = false
+  if (mesaEditando.value) {
+    mesasStore.atualizarMesa({ ...form })
+    mostrarSnackbar('Mesa atualizada com sucesso!', 'success')
+  } else {
+    mesasStore.adicionarMesa({ ...form })
+    mostrarSnackbar('Mesa adicionada com sucesso!', 'success')
   }
 
-  function abrirConfirm (mesa) {
-    mesaSelecionada.value = mesa
-    confirmDialog.value = true
-  }
+  dialog.value = false
+}
 
-  function removerMesa (mesa) {
-    mesas.value = mesas.value.filter(m => m.id !== mesa.id)
-    mostrarSnackbar('Mesa removida com sucesso!', 'error')
-  }
+function abrirConfirm(mesa) {
+  mesaSelecionada.value = mesa
+  confirmDialog.value = true
+}
 
-  function mostrarSnackbar (text, color = 'success') {
-    snackbar.text = text
-    snackbar.color = color
-    snackbar.show = true
-  }
+function removerMesa(mesa) {
+  mesasStore.removerMesa(mesa.id)
+  mostrarSnackbar('Mesa removida com sucesso!', 'error')
+}
 
-  const snackbar = reactive({ show: false, text: '', color: 'success' })
+function mostrarSnackbar(text, color = 'success') {
+  snackbar.text = text
+  snackbar.color = color
+  snackbar.show = true
+}
+
+const snackbar = reactive({ show: false, text: '', color: 'success' })
 </script>
