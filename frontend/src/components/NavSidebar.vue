@@ -39,31 +39,35 @@
 </template>
 
 <script setup>
-  import { ref, watch } from 'vue'
-  import { useRouter } from 'vue-router'
+import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
 
-  const router = useRouter()
+const router = useRouter()
+const auth = useAuthStore()
 
-  const props = defineProps({
-    paginaAtual: String,
-    modelValue: Boolean,
-  })
+const props = defineProps({
+  paginaAtual: String,
+  modelValue: Boolean,
+})
 
-  const emit = defineEmits(['update:modelValue', 'logout'])
+const emit = defineEmits(['update:modelValue', 'logout'])
 
-  const drawer = ref(props.modelValue)
-  watch(() => props.modelValue, val => drawer.value = val)
-  watch(drawer, val => emit('update:modelValue', val))
+const drawer = ref(props.modelValue)
+watch(() => props.modelValue, val => drawer.value = val)
+watch(drawer, val => emit('update:modelValue', val))
 
-  const mini = ref(false)
+const mini = ref(false)
 
-  const links = [
-    { title: 'Gerenciamento de Pratos', value: 'pratos', to: '/admin/pratos', icon: 'mdi-silverware-fork-knife' },
-    { title: 'Gerenciamento de Mesas', value: 'mesas', to: '/admin/mesas', icon: 'mdi-table-chair' },
-    { title: 'Métricas de administração', value: 'metricas', to: '/admin/metricas', icon: 'mdi-chart-bar' },
-  ]
+const links = [
+  { title: 'Gerenciamento de Pratos', value: 'pratos', to: '/admin/pratos', icon: 'mdi-silverware-fork-knife' },
+  { title: 'Gerenciamento de Mesas', value: 'mesas', to: '/admin/mesas', icon: 'mdi-table-chair' },
+  { title: 'Métricas de administração', value: 'metricas', to: '/admin/metricas', icon: 'mdi-chart-bar' },
+]
 
-  function handleLogout () {
-    router.push('/login')
-  }
+function handleLogout () {
+  auth.logout()
+  emit('logout')
+  router.push('/login')
+}
 </script>

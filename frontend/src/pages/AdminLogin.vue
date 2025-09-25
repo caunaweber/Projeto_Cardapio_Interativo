@@ -22,7 +22,7 @@
           prepend-inner-icon="mdi-account"
           required
           rounded="xl"
-          type="email"
+          type="text"
           variant="outlined"
         />
 
@@ -62,24 +62,24 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue'
-  import { useRouter } from 'vue-router'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
 
-  const router = useRouter()
-  const email = ref('')
-  const senha = ref('')
-  const erro = ref('')
+const router = useRouter()
+const email = ref('')
+const senha = ref('')
+const erro = ref('')
 
-  const ADMIN_EMAIL = 'admin'
-  const ADMIN_SENHA = '123'
+const auth = useAuthStore()
 
-  function fazerLogin () {
-    if (email.value === ADMIN_EMAIL && senha.value === ADMIN_SENHA) {
-      router.push({ name: 'AdminMetricas' })
-    } else {
-      erro.value = 'Email ou senha incorretos.'
-    }
+function fazerLogin() {
+  if (auth.login(email.value, senha.value)) {
+    router.push({ name: 'AdminMetricas' })
+  } else {
+    erro.value = 'Email ou senha incorretos.'
   }
+}
 </script>
 
 <style scoped>

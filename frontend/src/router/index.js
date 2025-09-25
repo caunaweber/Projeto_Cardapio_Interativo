@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
 
 import Default from '@/layouts/default.vue'
 
@@ -32,6 +33,7 @@ const routes = [
   {
     path: '/admin',
     component: Default,
+    meta: { requiresAuth: true, requiresAdmin: true },
     children: [
       {
         path: 'pratos',
@@ -55,6 +57,20 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+})
+
+router.beforeEach((to, from, next) => {
+  const auth = useAuthStore()
+
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    return next({ name: 'Login' })
+  }
+
+  if (to.meta.requiresAdmin && !auth.isAdmin) {
+    return next({ name: 'Login' })
+  }
+
+  next()
 })
 
 export default router
