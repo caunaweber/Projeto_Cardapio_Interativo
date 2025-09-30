@@ -115,85 +115,85 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
-import { useMesasStore } from '@/stores/mesasStore'
+  import { computed, reactive, ref } from 'vue'
+  import { useMesasStore } from '@/stores/mesasStore'
 
-const drawer = ref(false)
-const search = ref('')
-const dialog = ref(false)
-const mesaEditando = ref(null)
-const confirmDialog = ref(false)
-const mesaSelecionada = ref(null)
+  const drawer = ref(false)
+  const search = ref('')
+  const dialog = ref(false)
+  const mesaEditando = ref(null)
+  const confirmDialog = ref(false)
+  const mesaSelecionada = ref(null)
 
-const mesasStore = useMesasStore()
+  const mesasStore = useMesasStore()
 
-const headers = [
-  { title: 'Número', key: 'numero' },
-  { title: 'ID vinculado', key: 'IDvinc', align: 'center' },
-  { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
-]
+  const headers = [
+    { title: 'Número', key: 'numero' },
+    { title: 'ID vinculado', key: 'IDvinc', align: 'center' },
+    { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
+  ]
 
-const mesasFiltradas = computed(() => {
-  if (!search.value) return mesasStore.mesas
-  const termo = search.value.toLowerCase()
-  return mesasStore.mesas.filter(m =>
-    m.numero.toString().includes(termo) ||
-    m.IDvinc.toLowerCase().includes(termo),
-  )
-})
+  const mesasFiltradas = computed(() => {
+    if (!search.value) return mesasStore.mesas
+    const termo = search.value.toLowerCase()
+    return mesasStore.mesas.filter(m =>
+      m.numero.toString().includes(termo)
+      || m.IDvinc.toLowerCase().includes(termo),
+    )
+  })
 
-const formRef = ref(null)
+  const formRef = ref(null)
 
-const form = reactive({
-  id: null,
-  numero: null,
-  IDvinc: 'Indefinido',
-})
+  const form = reactive({
+    id: null,
+    numero: null,
+    IDvinc: 'Indefinido',
+  })
 
-function abrirDialog(mesa = null) {
-  if (mesa) {
-    mesaEditando.value = mesa
-    Object.assign(form, mesa)
-  } else {
-    mesaEditando.value = null
-    Object.assign(form, { id: null, numero: null, IDvinc: 'Indefinido' })
-  }
-  dialog.value = true
-}
-
-async function salvarMesa() {
-  const isValid = await formRef.value?.validate()
-  if (!isValid) {
-    mostrarSnackbar('Preencha todos os campos obrigatórios!', 'error')
-    return
+  function abrirDialog (mesa = null) {
+    if (mesa) {
+      mesaEditando.value = mesa
+      Object.assign(form, mesa)
+    } else {
+      mesaEditando.value = null
+      Object.assign(form, { id: null, numero: null, IDvinc: 'Indefinido' })
+    }
+    dialog.value = true
   }
 
-  if (mesaEditando.value) {
-    mesasStore.atualizarMesa({ ...form })
-    mostrarSnackbar('Mesa atualizada com sucesso!', 'success')
-  } else {
-    mesasStore.adicionarMesa({ ...form })
-    mostrarSnackbar('Mesa adicionada com sucesso!', 'success')
+  async function salvarMesa () {
+    const isValid = await formRef.value?.validate()
+    if (!isValid) {
+      mostrarSnackbar('Preencha todos os campos obrigatórios!', 'error')
+      return
+    }
+
+    if (mesaEditando.value) {
+      mesasStore.atualizarMesa({ ...form })
+      mostrarSnackbar('Mesa atualizada com sucesso!', 'success')
+    } else {
+      mesasStore.adicionarMesa({ ...form })
+      mostrarSnackbar('Mesa adicionada com sucesso!', 'success')
+    }
+
+    dialog.value = false
   }
 
-  dialog.value = false
-}
+  function abrirConfirm (mesa) {
+    mesaSelecionada.value = mesa
+    confirmDialog.value = true
+  }
 
-function abrirConfirm(mesa) {
-  mesaSelecionada.value = mesa
-  confirmDialog.value = true
-}
+  function removerMesa (mesa) {
+    mesasStore.removerMesa(mesa.id)
+    mostrarSnackbar('Mesa removida com sucesso!', 'error')
+  }
 
-function removerMesa(mesa) {
-  mesasStore.removerMesa(mesa.id)
-  mostrarSnackbar('Mesa removida com sucesso!', 'error')
-}
+  function mostrarSnackbar (text, color = 'success') {
+    snackbar.text = text
+    snackbar.color = color
+    snackbar.show = true
+  }
 
-function mostrarSnackbar(text, color = 'success') {
-  snackbar.text = text
-  snackbar.color = color
-  snackbar.show = true
-}
-
-const snackbar = reactive({ show: false, text: '', color: 'success' })
+  const snackbar = reactive({ show: false, text: '', color: 'success' })
 </script>

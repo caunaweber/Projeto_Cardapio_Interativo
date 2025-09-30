@@ -10,23 +10,23 @@ export const usePratosStore = defineStore('pratos', {
     categorias: ['Entrada', 'Prato Principal', 'Bebida', 'Sobremesa'],
   }),
   getters: {
-    totalPratos: (state) => state.pratos.length,
+    totalPratos: state => state.pratos.length,
   },
   actions: {
-    adicionarPrato(prato) {
+    adicionarPrato (prato) {
       this.pratos.push({
         ...prato,
         id: this.pratos.length + 1,
         vendas: 0,
       })
     },
-    atualizarPrato(pratoAtualizado) {
+    atualizarPrato (pratoAtualizado) {
       const index = this.pratos.findIndex(p => p.id === pratoAtualizado.id)
       if (index !== -1) {
         Object.assign(this.pratos[index], pratoAtualizado)
       }
     },
-    removerPrato(id) {
+    removerPrato (id) {
       this.pratos = this.pratos.filter(p => p.id !== id)
     },
   },

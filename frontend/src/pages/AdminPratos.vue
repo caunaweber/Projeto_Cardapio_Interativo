@@ -62,10 +62,22 @@
         </template>
 
         <template #item.acoes="{ item }">
-          <v-btn color="primary" icon size="small" variant="text" @click="abrirDialog(item)">
+          <v-btn
+            color="primary"
+            icon
+            size="small"
+            variant="text"
+            @click="abrirDialog(item)"
+          >
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
-          <v-btn color="error" icon size="small" variant="text" @click="abrirConfirm(item)">
+          <v-btn
+            color="error"
+            icon
+            size="small"
+            variant="text"
+            @click="abrirConfirm(item)"
+          >
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
@@ -81,8 +93,21 @@
         <v-form ref="formRef">
           <v-text-field v-model="pratoEditando.nome" label="Nome do prato" required />
           <v-select v-model="pratoEditando.categoria" :items="categorias" label="Categoria" required />
-          <v-text-field v-model.number="pratoEditando.preco" label="Preço" prefix="R$" required step="0.01" type="number" />
-          <v-file-input v-model="pratoEditando.file" accept="image/*" label="Imagem do prato" outlined prepend-icon="mdi-image" />
+          <v-text-field
+            v-model.number="pratoEditando.preco"
+            label="Preço"
+            prefix="R$"
+            required
+            step="0.01"
+            type="number"
+          />
+          <v-file-input
+            v-model="pratoEditando.file"
+            accept="image/*"
+            label="Imagem do prato"
+            outlined
+            prepend-icon="mdi-image"
+          />
         </v-form>
       </template>
 
@@ -110,83 +135,83 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, watch } from 'vue'
-import { usePratosStore } from '@/stores/pratosStore'
+  import { computed, reactive, ref, watch } from 'vue'
+  import { usePratosStore } from '@/stores/pratosStore'
 
-const pratoStore = usePratosStore()
+  const pratoStore = usePratosStore()
 
-const drawer = ref(false)
-const dialog = ref(false)
-const confirmDialog = ref(false)
-const pratoSelecionado = ref(null)
-const pratoEditando = reactive({})
-const search = ref('')
-const filtroCategoria = ref('Todos')
-const snackbar = reactive({ show: false, text: '', color: 'success' })
+  const drawer = ref(false)
+  const dialog = ref(false)
+  const confirmDialog = ref(false)
+  const pratoSelecionado = ref(null)
+  const pratoEditando = reactive({})
+  const search = ref('')
+  const filtroCategoria = ref('Todos')
+  const snackbar = reactive({ show: false, text: '', color: 'success' })
 
-const headers = [
-  { title: 'Imagem', key: 'imagem', align: 'center' },
-  { title: 'Nome', key: 'nome' },
-  { title: 'Categoria', key: 'categoria' },
-  { title: 'Preço', key: 'preco', align: 'end' },
-  { title: 'Vendas', key: 'vendas', align: 'center' },
-  { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
-]
+  const headers = [
+    { title: 'Imagem', key: 'imagem', align: 'center' },
+    { title: 'Nome', key: 'nome' },
+    { title: 'Categoria', key: 'categoria' },
+    { title: 'Preço', key: 'preco', align: 'end' },
+    { title: 'Vendas', key: 'vendas', align: 'center' },
+    { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
+  ]
 
-const categorias = pratoStore.categorias
+  const categorias = pratoStore.categorias
 
-const pratosFiltrados = computed(() => {
-  if (filtroCategoria.value === 'Todos') return pratoStore.pratos
-  return pratoStore.pratos.filter(p => p.categoria === filtroCategoria.value)
-})
+  const pratosFiltrados = computed(() => {
+    if (filtroCategoria.value === 'Todos') return pratoStore.pratos
+    return pratoStore.pratos.filter(p => p.categoria === filtroCategoria.value)
+  })
 
-watch(() => pratoEditando.file, file => {
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = e => pratoEditando.imagem = e.target.result
-  reader.readAsDataURL(file)
-})
+  watch(() => pratoEditando.file, file => {
+    if (!file) return
+    const reader = new FileReader()
+    reader.addEventListener('load', e => pratoEditando.imagem = e.target.result)
+    reader.readAsDataURL(file)
+  })
 
-function abrirDialog(prato = null) {
-  if (prato) {
-    Object.assign(pratoEditando, { ...prato, file: prato.file || null })
-  } else {
-    Object.assign(pratoEditando, { id: null, nome: '', categoria: '', preco: 0, imagem: '', file: null, vendas: 0 })
+  function abrirDialog (prato = null) {
+    if (prato) {
+      Object.assign(pratoEditando, { ...prato, file: prato.file || null })
+    } else {
+      Object.assign(pratoEditando, { id: null, nome: '', categoria: '', preco: 0, imagem: '', file: null, vendas: 0 })
+    }
+    dialog.value = true
   }
-  dialog.value = true
-}
 
-function salvarPrato() {
-  if (pratoEditando.id) {
-    pratoStore.atualizarPrato(pratoEditando)
-    mostrarSnackbar('Prato atualizado com sucesso!', 'success')
-  } else {
-    pratoStore.adicionarPrato(pratoEditando)
-    mostrarSnackbar('Prato adicionado com sucesso!', 'success')
+  function salvarPrato () {
+    if (pratoEditando.id) {
+      pratoStore.atualizarPrato(pratoEditando)
+      mostrarSnackbar('Prato atualizado com sucesso!', 'success')
+    } else {
+      pratoStore.adicionarPrato(pratoEditando)
+      mostrarSnackbar('Prato adicionado com sucesso!', 'success')
+    }
+    dialog.value = false
   }
-  dialog.value = false
-}
 
-function removerPrato(prato) {
-  pratoStore.removerPrato(prato.id)
-  mostrarSnackbar('Prato removido com sucesso!', 'error')
-}
+  function removerPrato (prato) {
+    pratoStore.removerPrato(prato.id)
+    mostrarSnackbar('Prato removido com sucesso!', 'error')
+  }
 
-function abrirConfirm(prato) {
-  pratoSelecionado.value = prato
-  confirmDialog.value = true
-}
+  function abrirConfirm (prato) {
+    pratoSelecionado.value = prato
+    confirmDialog.value = true
+  }
 
-function mostrarSnackbar(text, color = 'success') {
-  snackbar.text = text
-  snackbar.color = color
-  snackbar.show = true
-}
+  function mostrarSnackbar (text, color = 'success') {
+    snackbar.text = text
+    snackbar.color = color
+    snackbar.show = true
+  }
 
-function getImageSrc(imagem) {
-  if (!imagem) return '/no-image.png'
-  if (typeof imagem !== 'string') return '/no-image.png'
-  if (imagem.startsWith('data:') || imagem.startsWith('blob:') || imagem.startsWith('/') || imagem.startsWith('http')) return imagem
-  return '/' + imagem
-}
+  function getImageSrc (imagem) {
+    if (!imagem) return '/no-image.png'
+    if (typeof imagem !== 'string') return '/no-image.png'
+    if (imagem.startsWith('data:') || imagem.startsWith('blob:') || imagem.startsWith('/') || imagem.startsWith('http')) return imagem
+    return '/' + imagem
+  }
 </script>

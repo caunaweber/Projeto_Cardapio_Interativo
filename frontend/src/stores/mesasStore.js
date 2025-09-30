@@ -9,22 +9,22 @@ export const useMesasStore = defineStore('mesas', {
     ],
   }),
   getters: {
-    totalMesas: (state) => state.mesas.length,
+    totalMesas: state => state.mesas.length,
   },
   actions: {
-    adicionarMesa(mesa) {
+    adicionarMesa (mesa) {
       this.mesas.push({
         ...mesa,
         id: this.mesas.length + 1,
       })
     },
-    atualizarMesa(mesaAtualizada) {
+    atualizarMesa (mesaAtualizada) {
       const index = this.mesas.findIndex(m => m.id === mesaAtualizada.id)
       if (index !== -1) {
         this.mesas[index] = { ...mesaAtualizada }
       }
     },
-    removerMesa(id) {
+    removerMesa (id) {
       this.mesas = this.mesas.filter(m => m.id !== id)
     },
   },
