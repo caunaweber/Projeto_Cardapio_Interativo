@@ -11,15 +11,24 @@
     <NavSidebar v-model="drawer" :pagina-atual="'metricas'" />
 
     <v-container class="py-6" fluid>
-      <v-row class="pb-4 " dense>
+      <v-row class="pb-4" dense>
         <v-col cols="12" md="7">
-          <v-card class="pa-4 elevation-2 rounded-xl hover-card" min-height="400px" style="border: 2px solid rgba(var(--v-theme-primary), 0.75);">
+          <v-card
+            class="pa-4 elevation-2 rounded-xl hover-card"
+            min-height="400px"
+            style="border: 2px solid rgba(var(--v-theme-primary), 0.75);"
+          >
             <h3 class="mb-4">📊 Vendas por categoria</h3>
             <BarChart :data="chartData" />
           </v-card>
         </v-col>
+
         <v-col cols="12" md="5">
-          <v-card class="pa-4 elevation-2 rounded-xl hover-card" min-height="400px" style="border: 2px solid rgba(var(--v-theme-primary), 0.75);">
+          <v-card
+            class="pa-4 elevation-2 rounded-xl hover-card"
+            min-height="400px"
+            style="border: 2px solid rgba(var(--v-theme-primary), 0.75);"
+          >
             <h3 class="mb-4">🥧 Participação nas vendas</h3>
             <PieChart :data="chartData" />
           </v-card>
@@ -46,7 +55,9 @@
             :total="categoria.items.reduce((sum, item) => sum + item.vendas, 0)"
           />
         </v-col>
+
         <v-divider />
+
         <v-col
           v-for="(categoria, i) in metricasMenosVendidas"
           :key="i"
@@ -68,6 +79,7 @@
     </v-container>
   </v-container>
 </template>
+
 <script setup>
   import { computed, onMounted, ref } from 'vue'
   import BarChart from '@/components/BarChart.vue'
@@ -75,15 +87,10 @@
   import MetricCard from '@/components/MetricCard.vue'
   import NavSidebar from '@/components/NavSidebar.vue'
   import PieChart from '@/components/PieChart.vue'
-
   import { useMetricasStore } from '@/stores/metricasStore'
 
   const drawer = ref(false)
   const metricasStore = useMetricasStore()
-
-  onMounted(() => {
-    metricasStore.carregarMock()
-  })
 
   const chartData = computed(() => metricasStore.chartData)
   const metricasMaisVendidas = computed(() => metricasStore.metricasMaisVendidas)
@@ -91,11 +98,12 @@
 </script>
 
 <style scoped>
-.hover-card {
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.hover-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
+  .hover-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .hover-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
 </style>
