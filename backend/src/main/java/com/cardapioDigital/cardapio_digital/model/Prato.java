@@ -1,5 +1,6 @@
 package com.cardapioDigital.cardapio_digital.model;
 
+import com.cardapioDigital.cardapio_digital.dto.CreatePratoDto;
 import com.cardapioDigital.cardapio_digital.enums.Categoria;
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,9 +8,10 @@ import lombok.*;
 @Entity(name = "Prato")
 @Table(name = "Pratos")
 @EqualsAndHashCode(of = "id")
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
+@ToString
 public class Prato {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +20,14 @@ public class Prato {
     private Double preco;
 
     @Enumerated(EnumType.STRING)
-    Categoria categoria;
+    private Categoria categoria;
 
     private String imagem;
+
+    public Prato(CreatePratoDto dto){
+        this.nome = dto.nome();
+        this.categoria = dto.categoria();
+        this.imagem = dto.imagem();
+        this.preco = dto.preco();
+    }
 }
