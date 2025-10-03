@@ -25,6 +25,8 @@ public class Prato {
 
     private String imagem;
 
+    private int vendasCounter = 0;
+
     public Prato(CreatePratoDto dto){
         this.nome = dto.nome();
         this.categoria = dto.categoria();

@@ -56,4 +56,11 @@ public class PratoService {
         prato.update(dto);
         return prato;
     }
+
+    @Transactional
+    public void registrarVenda(Long id, int qtd){
+        Prato prato = pratoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prato não encontrado"));
+        pratoRepository.incrementarVendas(id, qtd);
+    }
 }
