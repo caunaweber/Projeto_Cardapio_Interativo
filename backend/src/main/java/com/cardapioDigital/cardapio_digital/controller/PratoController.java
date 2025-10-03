@@ -44,7 +44,7 @@ public class PratoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ResponsePratoDto> updatePrato(@PathVariable Long id, @RequestBody @Valid UpdatePratoDto dto) {
-        Prato prato = pratoService.UpdatePrato(id, dto);
+        Prato prato = pratoService.updatePrato(id, dto);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponsePratoDto(prato));
     }
 }

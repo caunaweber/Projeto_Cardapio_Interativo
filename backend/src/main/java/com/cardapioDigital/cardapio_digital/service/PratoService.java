@@ -50,7 +50,7 @@ public class PratoService {
     }
 
     @Transactional
-    public Prato UpdatePrato(long id, UpdatePratoDto dto) {
+    public Prato updatePrato(long id, UpdatePratoDto dto) {
         Prato prato = pratoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prato não encontrado"));
         prato.update(dto);
