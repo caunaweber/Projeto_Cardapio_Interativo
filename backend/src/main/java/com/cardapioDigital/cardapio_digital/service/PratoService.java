@@ -21,7 +21,7 @@ public class PratoService {
     private PratoRepository pratoRepository;
 
     @Transactional(readOnly = true)
-    public List<ResponsePratoDto> listAll(){
+    public List<ResponsePratoDto> getAllPratos() {
         return pratoRepository.findAll()
                 .stream()
                 .map(prato -> new ResponsePratoDto(prato))
@@ -29,7 +29,7 @@ public class PratoService {
     }
 
     @Transactional(readOnly = true)
-    public ResponsePratoDto findById(long id) {
+    public ResponsePratoDto getPratoById(long id) {
         Prato prato = pratoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prato não encontrado"));
                 return new ResponsePratoDto(prato);

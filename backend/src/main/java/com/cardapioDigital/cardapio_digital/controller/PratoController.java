@@ -21,13 +21,13 @@ public class PratoController {
     private PratoService pratoService;
 
     @GetMapping
-    public ResponseEntity<List<ResponsePratoDto>> getAllPratos() {
-        return ResponseEntity.ok().body(pratoService.listAll());
+    public ResponseEntity<List<ResponsePratoDto>> getPratos() {
+        return ResponseEntity.ok().body(pratoService.getAllPratos());
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<ResponsePratoDto> getPrato(@PathVariable Long id) {
-        return ResponseEntity.ok().body(pratoService.findById(id));
+    public ResponseEntity<ResponsePratoDto> getPratoById(@PathVariable Long id) {
+        return ResponseEntity.ok().body(pratoService.getPratoById(id));
     }
 
     @PostMapping

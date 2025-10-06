@@ -1,6 +1,7 @@
 package com.cardapioDigital.cardapio_digital.service;
 
 import com.cardapioDigital.cardapio_digital.dto.CreateMesaDto;
+import com.cardapioDigital.cardapio_digital.dto.ResponseMesaDto;
 import com.cardapioDigital.cardapio_digital.dto.UpdateMesaDto;
 import com.cardapioDigital.cardapio_digital.model.Mesa;
 import com.cardapioDigital.cardapio_digital.repository.MesaRepository;
@@ -10,11 +11,30 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class MesaService {
 
     @Autowired
     MesaRepository mesaRepository;
+
+    @Transactional(readOnly = true)
+    public List<ResponseMesaDto> getAllMesas(){
+        return mesaRepository
+                .findAll()
+                .stream()
+                .map(mesa -> new ResponseMesaDto(mesa))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseMesaDto getMesaById(long id){
+        Mesa mesa = mesaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mesa não encontrada"));
+        return new ResponseMesaDto(mesa);
+    }
 
     @Transactional
     public Mesa createMesa(CreateMesaDto dto){
