@@ -25,7 +25,7 @@ public class MesaController {
         return ResponseEntity.ok().body(mesaService.getAllMesas());
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public ResponseEntity<ResponseMesaDto> getMesaById(@PathVariable Long id){
         return ResponseEntity.ok().body(mesaService.getMesaById(id));
     }
