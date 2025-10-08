@@ -1,5 +1,7 @@
 package com.cardapioDigital.cardapio_digital.model;
 
+import com.cardapioDigital.cardapio_digital.dto.CreateComandaDto;
+import com.cardapioDigital.cardapio_digital.dto.CreateComandaItemDto;
 import com.cardapioDigital.cardapio_digital.enums.ComandaStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -39,5 +41,17 @@ public class Comanda {
     public void adicionarItem(ComandaItens item) {
         item.setComanda(this);
         this.itens.add(item);
+    }
+
+    public static Comanda createComandaFromDto(CreateComandaDto dto){
+        Comanda comanda = new Comanda();
+        comanda.setStatus(ComandaStatus.A_ENTREGAR);
+        comanda.setMesaNum(dto.mesaNum());
+
+        for(CreateComandaItemDto itensDto : dto.itens()){
+            comanda.adicionarItem(ComandaItens.createComandaItem(itensDto));
+        }
+
+        return comanda;
     }
 }
