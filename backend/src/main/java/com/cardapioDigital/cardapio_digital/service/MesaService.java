@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class MesaService {
 
     @Autowired
-    MesaRepository mesaRepository;
+    private MesaRepository mesaRepository;
 
     @Transactional(readOnly = true)
     public List<ResponseMesaDto> getAllMesas(){

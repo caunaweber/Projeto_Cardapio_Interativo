@@ -20,7 +20,7 @@ public record ResponseComandaDto(
                 .stream()
                 .map(item -> new ResponseComandaItemDto(
                         item.getId(),
-                        item.getPrato(),
+                        item.getPratoId(),
                         item.getQtd()
                 )).collect(Collectors.toList());
         return new ResponseComandaDto(

@@ -2,7 +2,6 @@ package com.cardapioDigital.cardapio_digital.model;
 
 import com.cardapioDigital.cardapio_digital.dto.CreateComandaItemDto;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,8 +16,8 @@ public class ComandaItens {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    private String prato;
+    @NotNull
+    private long pratoId;
 
     @NotNull
     private int qtd;
@@ -29,7 +28,7 @@ public class ComandaItens {
 
     public static ComandaItens createComandaItem(CreateComandaItemDto dto){
         ComandaItens item = new ComandaItens();
-        item.setPrato(dto.prato());
+        item.setPratoId(dto.pratoId());
         item.setQtd(dto.qtd());
         return item;
     }

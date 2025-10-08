@@ -4,6 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record ResponseComandaItemDto(
         @JsonProperty("id") long id,
-        @JsonProperty("prato") String prato,
+        @JsonProperty("pratoId") Long pratoId,
         @JsonProperty("qtd") int qtd                             ) {
 }
