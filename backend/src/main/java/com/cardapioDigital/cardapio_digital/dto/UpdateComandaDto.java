@@ -1,4 +1,10 @@
 package com.cardapioDigital.cardapio_digital.dto;
 
-public record UpdateComandaDto() {
+import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
+
+public record UpdateComandaDto(
+        @NotNull List<CreateComandaItemDto> itens
+) {
 }

@@ -1,13 +1,11 @@
 package com.cardapioDigital.cardapio_digital.controller;
 
 import com.cardapioDigital.cardapio_digital.dto.ResponseComandaDto;
+import com.cardapioDigital.cardapio_digital.dto.UpdateComandaDto;
 import com.cardapioDigital.cardapio_digital.service.ComandaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,5 +26,17 @@ public class ComandaController {
     public ResponseEntity<ResponseComandaDto> getComandaById(@PathVariable Long id) {
         ResponseComandaDto dto = comandaService.getComandaById(id);
         return ResponseEntity.ok(dto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteComandaById(@PathVariable Long id) {
+        comandaService.deleteComanda(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseComandaDto> updateComandaById(@PathVariable Long id, @RequestBody UpdateComandaDto dto) {
+        ResponseComandaDto updated = comandaService.updateComanda(id, dto);
+        return ResponseEntity.ok(updated);
     }
 }

@@ -2,6 +2,7 @@ package com.cardapioDigital.cardapio_digital.service;
 
 import com.cardapioDigital.cardapio_digital.dto.CreateComandaDto;
 import com.cardapioDigital.cardapio_digital.dto.ResponseComandaDto;
+import com.cardapioDigital.cardapio_digital.dto.UpdateComandaDto;
 import com.cardapioDigital.cardapio_digital.model.Comanda;
 import com.cardapioDigital.cardapio_digital.repository.ComandaRepository;
 import com.cardapioDigital.cardapio_digital.repository.PratoRepository;
@@ -55,6 +56,40 @@ public class ComandaService {
         Comanda comanda = comandaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comanda não encontrada"));
         return ResponseComandaDto.createComandaResponse(comanda);
+    }
+
+    @Transactional
+    public void deleteComanda(Long id) {
+        Comanda comanda = comandaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comanda inexistente"));
+        comandaRepository.delete(comanda);
+    }
+
+    @Transactional
+    public ResponseComandaDto updateComanda(Long id, UpdateComandaDto dto) {
+        Comanda comanda = comandaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comanda inexistente"));
+
+        comanda.getItens().forEach(itens -> {
+            pratoRepository.incrementarVendas(itens.getPratoId(), -itens.getQtd());
+        });
+
+        comanda.getItens().clear();
+
+        dto.itens().forEach(itemDto -> {
+            if (!pratoRepository.existsById(itemDto.pratoId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Prato com id " + itemDto.pratoId() + " não existe");
+            }
+            if (itemDto.qtd() <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantidade deve ser maior que zero");
+            }
+            pratoRepository.incrementarVendas(itemDto.pratoId(), itemDto.qtd());
+            comanda.adicionarItem(
+                    com.cardapioDigital.cardapio_digital.model.ComandaItens.createComandaItem(itemDto)
+            );
+        });
+        Comanda comandaAtualizada = comandaRepository.save(comanda);
+        return ResponseComandaDto.createComandaResponse(comandaAtualizada);
     }
 }
 
