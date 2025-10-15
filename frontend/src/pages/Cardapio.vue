@@ -150,7 +150,6 @@
 
 <script setup>
   import { computed, ref } from 'vue'
-  // import router from '@/router'
   import { useCardapioStore } from '@/stores/cardapioStore'
   import { useCarrinhoStore } from '@/stores/carrinhoStore'
   import { useComandaStore } from '@/stores/comandaStore'
@@ -165,6 +164,10 @@
   const cardapio = useCardapioStore()
   const carrinho = useCarrinhoStore()
   const comandaStore = useComandaStore()
+
+  onMounted(() => {
+    cardapio.carregarCardapio()
+  })
 
   const categoriasFiltradas = computed(() => {
     return cardapio.categorias.map(c => {
@@ -194,7 +197,6 @@
 
     comandaStore.criarComanda(carrinho.pedidos)
     carrinho.confirmarPedido()
-    // router.push('/comandas')
 
     dialogConfirmar.value = false
     snackbar.value = true
