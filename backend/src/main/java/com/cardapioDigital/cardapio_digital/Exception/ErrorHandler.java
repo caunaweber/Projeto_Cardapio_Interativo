@@ -1,6 +1,6 @@
 package com.cardapioDigital.cardapio_digital.Exception;
 
-import com.cardapioDigital.cardapio_digital.dto.RespondeExceptionDto;
+import com.cardapioDigital.cardapio_digital.dto.ResponseExceptionDto;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +12,8 @@ import org.springframework.web.server.ResponseStatusException;
 public class ErrorHandler {
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<RespondeExceptionDto> handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request) {
-        RespondeExceptionDto errorDto = new RespondeExceptionDto(
+    public ResponseEntity<ResponseExceptionDto> handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request) {
+        ResponseExceptionDto errorDto = new ResponseExceptionDto(
                 (HttpStatus) ex.getStatusCode(),
                 ex.getReason(),
                 request.getRequestURI()

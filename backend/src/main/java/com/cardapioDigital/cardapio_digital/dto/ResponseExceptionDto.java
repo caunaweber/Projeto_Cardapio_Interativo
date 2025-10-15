@@ -5,14 +5,14 @@ import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
-public record RespondeExceptionDto(
+public record ResponseExceptionDto(
                                    LocalDateTime timestamp,
                                    Integer status,
                                    String error,
                                    String message,
                                    String path
 ) {
-    public RespondeExceptionDto(@NotNull HttpStatus status, String message, String path) {
+    public ResponseExceptionDto(@NotNull HttpStatus status, String message, String path) {
         this(
                 LocalDateTime.now(),
                 status.value(),
