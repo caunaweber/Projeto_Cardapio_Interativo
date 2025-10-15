@@ -25,7 +25,7 @@ public class PratoController {
         return ResponseEntity.ok().body(pratoService.getAllPratos());
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ResponsePratoDto> getPratoById(@PathVariable Long id) {
         return ResponseEntity.ok().body(pratoService.getPratoById(id));
     }
