@@ -25,14 +25,12 @@ public class Aparelho {
     private String deviceId;
 
     @Column(nullable = false)
-    private LocalDateTime dataRegistro;
+    private LocalDateTime dataRegistry;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mesa_id")
-    private Mesa mesaVinculada;
+    private Integer mesaNum;
 
     public Aparelho(CreateAparelhoDto dto){
         this.deviceId = dto.deviceId();
-        this.dataRegistro = LocalDateTime.now();
+        this.dataRegistry = LocalDateTime.now();
     }
 }

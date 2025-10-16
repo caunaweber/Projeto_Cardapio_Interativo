@@ -41,8 +41,8 @@ public class AparelhoController {
     }
 
     @PutMapping("/{id}/vincular")
-    public ResponseEntity<ResponseAparelhoDto> vincular(@PathVariable Long id, @RequestParam Long mesaId) {
-        return ResponseEntity.ok(aparelhoService.vincularAparelho(id, mesaId));
+    public ResponseEntity<ResponseAparelhoDto> vincular(@PathVariable Long id, @RequestParam Integer mesaNum) {
+        return ResponseEntity.ok(aparelhoService.vincularAparelho(id, mesaNum));
     }
 
     @PutMapping("/{id}/desvincular")

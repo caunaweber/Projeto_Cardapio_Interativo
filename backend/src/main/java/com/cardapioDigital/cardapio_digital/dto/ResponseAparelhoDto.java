@@ -7,15 +7,15 @@ import java.time.LocalDateTime;
 public record ResponseAparelhoDto(
         Long id,
         String deviceId,
-        LocalDateTime dataRegistro,
-        Long mesaVinculadaId
+        LocalDateTime dataRegistry,
+        Integer mesaNum
 ) {
     public ResponseAparelhoDto(Aparelho aparelho) {
         this(
                 aparelho.getId(),
                 aparelho.getDeviceId(),
-                aparelho.getDataRegistro(),
-                aparelho.getMesaVinculada() != null ? aparelho.getMesaVinculada().getId() : null
+                aparelho.getDataRegistry(),
+                aparelho.getMesaNum()
         );
     }
 }

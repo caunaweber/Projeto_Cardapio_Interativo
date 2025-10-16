@@ -81,7 +81,7 @@
 </template>
 
 <script setup>
-  import { computed, onMounted, ref } from 'vue'
+  import { computed, ref } from 'vue'
   import BarChart from '@/components/BarChart.vue'
   import MenuAppBar from '@/components/MenuAppBar.vue'
   import MetricCard from '@/components/MetricCard.vue'

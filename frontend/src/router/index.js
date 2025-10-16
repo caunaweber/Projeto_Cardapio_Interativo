@@ -1,14 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore'
-
 import Default from '@/layouts/default.vue'
 
+import AdminAparelhos from '@/pages/AdminAparelhos.vue'
 import AdminLogin from '@/pages/AdminLogin.vue'
-import AdminMesas from '@/pages/AdminMesas.vue'
 import AdminMetricas from '@/pages/AdminMetricas.vue'
 import AdminPratos from '@/pages/AdminPratos.vue'
 import Cardapio from '@/pages/Cardapio.vue'
 import Comandas from '@/pages/Comandas.vue'
+import { useAuthStore } from '@/stores/authStore'
 
 const routes = [
   {
@@ -42,9 +41,9 @@ const routes = [
         component: AdminPratos,
       },
       {
-        path: 'mesas',
-        name: 'AdminMesas',
-        component: AdminMesas,
+        path: 'aparelhos',
+        name: 'AdminAparelhos',
+        component: AdminAparelhos,
       },
       {
         path: 'metricas',

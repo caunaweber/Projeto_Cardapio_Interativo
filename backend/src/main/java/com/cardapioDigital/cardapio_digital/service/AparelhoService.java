@@ -3,9 +3,7 @@ package com.cardapioDigital.cardapio_digital.service;
 import com.cardapioDigital.cardapio_digital.dto.CreateAparelhoDto;
 import com.cardapioDigital.cardapio_digital.dto.ResponseAparelhoDto;
 import com.cardapioDigital.cardapio_digital.model.Aparelho;
-import com.cardapioDigital.cardapio_digital.model.Mesa;
 import com.cardapioDigital.cardapio_digital.repository.AparelhoRepository;
-import com.cardapioDigital.cardapio_digital.repository.MesaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,9 +18,6 @@ public class AparelhoService {
 
     @Autowired
     private AparelhoRepository aparelhoRepository;
-
-    @Autowired
-    private MesaRepository mesaRepository;
 
     @Transactional(readOnly = true)
     public List<ResponseAparelhoDto> getAllAparelhos() {
@@ -54,13 +49,12 @@ public class AparelhoService {
     }
 
     @Transactional
-    public ResponseAparelhoDto vincularAparelho(Long aparelhoId, Long mesaId) {
+    public ResponseAparelhoDto vincularAparelho(Long aparelhoId, Integer mesaNum) {
         Aparelho aparelho = aparelhoRepository.findById(aparelhoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aparelho não encontrado"));
-        Mesa mesa = mesaRepository.findById(mesaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mesa não encontrada"));
 
-        aparelho.setMesaVinculada(mesa);
+        aparelho.setMesaNum(mesaNum);
+
         return new ResponseAparelhoDto(aparelhoRepository.save(aparelho));
     }
 
@@ -68,7 +62,7 @@ public class AparelhoService {
     public ResponseAparelhoDto desvincularAparelho(Long aparelhoId) {
         Aparelho aparelho = aparelhoRepository.findById(aparelhoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aparelho não encontrado"));
-        aparelho.setMesaVinculada(null);
+        aparelho.setMesaNum(null);
         Aparelho salvo = aparelhoRepository.save(aparelho);
         return new ResponseAparelhoDto(salvo);
     }
