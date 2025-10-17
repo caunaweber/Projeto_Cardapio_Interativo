@@ -1,11 +1,11 @@
 <template>
-  <v-container class="menu-bg" fluid>
-    <MenuAppBar title="🍴 Restaurante - Cardápio" @toggle-drawer="drawer = !drawer">
+  <v-container v-if="device.validated" class="menu-bg" fluid>
+    <MenuAppBar title="🍴 Restaurante" @toggle-drawer="drawer = !drawer">
       <template #title-side>
         <span class="text-caption text-medium-emphasis ml-4">
-          Aparelho não configurado ID: #{{ 12 }}
-        </span>
-      </template>
+          <span v-if="device.mesa">Mesa: #{{ device.mesa }}</span>
+          <span v-else>Aparelho não configurado ID: #{{ device.deviceId }}</span>
+        </span></template>
 
       <template #actions="{ toggleDrawer }">
         <v-btn
@@ -48,7 +48,9 @@
 
     <v-container class="py-1">
       <div v-for="categoria in categoriasFiltradas" :key="categoria.nome" class="mb-10">
-        <h2 class="mb-6 text-h5 font-weight-bold text-primary border-b-md pb-4">{{ categoria.nome }}</h2>
+        <h2 class="mb-6 text-h5 font-weight-bold text-primary border-b-md pb-4">
+          {{ categoria.nome }}
+        </h2>
         <v-row dense>
           <v-col
             v-for="produto in categoria.itensFiltrados"
@@ -101,14 +103,13 @@
       </template>
     </MenuDialog>
 
-    <MenuFooter :total-itens="carrinho.totalItens" :total-preco="carrinho.totalPreco" @action="dialogConfirmar = true">
+    <MenuFooter
+      :total-itens="carrinho.totalItens"
+      :total-preco="carrinho.totalPreco"
+      @action="dialogConfirmar = true"
+    >
       <template #content>
-        <v-btn
-          color="primary"
-          large
-          rounded="xl"
-          @click="scrollToTop"
-        >
+        <v-btn color="primary" large rounded="xl" @click="scrollToTop">
           <v-icon left>mdi-arrow-up</v-icon>
         </v-btn>
       </template>
@@ -146,13 +147,35 @@
       Não há pedidos no carrinho!
     </v-snackbar>
   </v-container>
+
+  <v-dialog v-model="showKeyModal" max-width="400px" persistent>
+    <v-card>
+      <v-card-title>🔐 Validar dispositivo</v-card-title>
+      <v-card-text>
+        <v-text-field
+          v-model="key"
+          :disabled="device.loading"
+          label="Chave de acesso"
+          outlined
+          type="password"
+        />
+        <p v-if="device.error" class="text-error">{{ device.error }}</p>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="success" :disabled="!key" :loading="device.loading" @click="handleValidate">
+          Validar
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup>
-  import { computed, ref } from 'vue'
+  import { computed, onMounted, ref } from 'vue'
   import { useCardapioStore } from '@/stores/cardapioStore'
   import { useCarrinhoStore } from '@/stores/carrinhoStore'
   import { useComandaStore } from '@/stores/comandaStore'
+  import { useDeviceStore } from '@/stores/deviceStore'
 
   const drawer = ref(false)
   const dialogConfirmar = ref(false)
@@ -160,24 +183,35 @@
   const filtroCategoria = ref('Todas')
   const snackbar = ref(false)
   const snackbarDanger = ref(false)
+  const key = ref('')
 
   const cardapio = useCardapioStore()
   const carrinho = useCarrinhoStore()
   const comandaStore = useComandaStore()
+  const device = useDeviceStore()
+
+  const showKeyModal = computed(() => !device.validated && !device.loading)
 
   onMounted(() => {
+    device.initDevice()
     cardapio.carregarCardapio()
   })
 
+  function handleValidate () {
+    device.validateKey(key.value)
+  }
+
   const categoriasFiltradas = computed(() => {
-    return cardapio.categorias.map(c => {
-      const itensFiltrados = c.itens.filter(p => {
-        const passaCategoria = filtroCategoria.value === 'Todas' || c.nome === filtroCategoria.value
-        const termo = search.value.toLowerCase()
-        return p.nome.toLowerCase().includes(termo) && passaCategoria
+    return cardapio.categorias
+      .map(c => {
+        const itensFiltrados = c.itens.filter(p => {
+          const passaCategoria = filtroCategoria.value === 'Todas' || c.nome === filtroCategoria.value
+          const termo = search.value.toLowerCase()
+          return p.nome.toLowerCase().includes(termo) && passaCategoria
+        })
+        return { ...c, itensFiltrados }
       })
-      return { ...c, itensFiltrados }
-    }).filter(c => c.itensFiltrados.length > 0)
+      .filter(c => c.itensFiltrados.length > 0)
   })
 
   function adicionar (id) {
@@ -193,7 +227,7 @@
   }
 
   function confirmarPedido () {
-    if (carrinho.pedidos.length === 0) return snackbarDanger.value = true
+    if (carrinho.pedidos.length === 0) return (snackbarDanger.value = true)
 
     comandaStore.criarComanda(carrinho.pedidos)
     carrinho.confirmarPedido()

@@ -29,6 +29,8 @@ public class Aparelho {
 
     private Integer mesaNum;
 
+    private boolean validated = false;
+
     public Aparelho(CreateAparelhoDto dto){
         this.deviceId = dto.deviceId();
         this.dataRegistry = LocalDateTime.now();

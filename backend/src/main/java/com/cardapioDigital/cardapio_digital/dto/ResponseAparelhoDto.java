@@ -8,6 +8,7 @@ public record ResponseAparelhoDto(
         Long id,
         String deviceId,
         LocalDateTime dataRegistry,
+        boolean validated,
         Integer mesaNum
 ) {
     public ResponseAparelhoDto(Aparelho aparelho) {
@@ -15,6 +16,7 @@ public record ResponseAparelhoDto(
                 aparelho.getId(),
                 aparelho.getDeviceId(),
                 aparelho.getDataRegistry(),
+                aparelho.isValidated(),
                 aparelho.getMesaNum()
         );
     }

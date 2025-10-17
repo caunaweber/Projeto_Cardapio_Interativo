@@ -5,6 +5,7 @@ import com.cardapioDigital.cardapio_digital.dto.ResponseAparelhoDto;
 import com.cardapioDigital.cardapio_digital.model.Aparelho;
 import com.cardapioDigital.cardapio_digital.repository.AparelhoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,9 @@ public class AparelhoService {
 
     @Autowired
     private AparelhoRepository aparelhoRepository;
+
+    @Value("${app.secret.key}")
+    private String secretKey;
 
     @Transactional(readOnly = true)
     public List<ResponseAparelhoDto> getAllAparelhos() {
@@ -35,35 +39,34 @@ public class AparelhoService {
         return new ResponseAparelhoDto(aparelho);
     }
 
-    @Transactional(readOnly = true)
-    public ResponseAparelhoDto getAparelhoByDeviceId(String deviceId) {
-        Aparelho aparelho = aparelhoRepository.findByDeviceId(deviceId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aparelho não encontrado"));
-        return new ResponseAparelhoDto(aparelho);
-    }
-
     @Transactional
     public Aparelho createOrReturnAparelho(CreateAparelhoDto dto) {
         return aparelhoRepository.findByDeviceId(dto.deviceId())
                 .orElseGet(() -> aparelhoRepository.save(new Aparelho(dto)));
     }
 
-    @Transactional
-    public ResponseAparelhoDto vincularAparelho(Long aparelhoId, Integer mesaNum) {
-        Aparelho aparelho = aparelhoRepository.findById(aparelhoId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aparelho não encontrado"));
+    @Transactional(readOnly = true)
+    public ResponseAparelhoDto verifiyAparelhoByDeviceId(String deviceId) {
+        Aparelho aparelho = aparelhoRepository.findByDeviceId(deviceId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aparelho não encontado"));
 
-        aparelho.setMesaNum(mesaNum);
-
-        return new ResponseAparelhoDto(aparelhoRepository.save(aparelho));
+        if (!aparelho.isValidated()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Aparelho não autorizado");
+        }
+        return new ResponseAparelhoDto(aparelho);
     }
 
     @Transactional
-    public ResponseAparelhoDto desvincularAparelho(Long aparelhoId) {
-        Aparelho aparelho = aparelhoRepository.findById(aparelhoId)
+    public void validateAparelho(String deviceId, String providedKey) {
+        Aparelho aparelho = aparelhoRepository.findByDeviceId(deviceId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aparelho não encontrado"));
-        aparelho.setMesaNum(null);
-        Aparelho salvo = aparelhoRepository.save(aparelho);
-        return new ResponseAparelhoDto(salvo);
+
+        if (!providedKey.equals(secretKey)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Chave de acesso inválida");
+        }
+
+        aparelho.setValidated(true);
+        aparelhoRepository.save(aparelho);
     }
+
 }
