@@ -4,9 +4,11 @@ import com.cardapioDigital.cardapio_digital.dto.CreateAparelhoDto;
 import com.cardapioDigital.cardapio_digital.dto.ResponseAparelhoDto;
 import com.cardapioDigital.cardapio_digital.model.Aparelho;
 import com.cardapioDigital.cardapio_digital.repository.AparelhoRepository;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,7 +23,14 @@ public class AparelhoService {
     private AparelhoRepository aparelhoRepository;
 
     @Value("${app.secret.key}")
-    private String secretKey;
+    private String rawSecretKey;
+
+    private String hashedSecretKey;
+
+    @PostConstruct
+    public void init() {
+        this.hashedSecretKey = BCrypt.hashpw(rawSecretKey, BCrypt.gensalt());
+    }
 
     @Transactional(readOnly = true)
     public List<ResponseAparelhoDto> getAllAparelhos() {
@@ -61,7 +70,7 @@ public class AparelhoService {
         Aparelho aparelho = aparelhoRepository.findByDeviceId(deviceId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aparelho não encontrado"));
 
-        if (!providedKey.equals(secretKey)) {
+        if (!BCrypt.checkpw(providedKey, hashedSecretKey)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Chave de acesso inválida");
         }
 
