@@ -24,7 +24,7 @@ public class ComandaService {
     private PratoRepository pratoRepository;
 
     @Transactional
-    public Comanda createComanda(CreateComandaDto dto){
+    public ResponseComandaDto createComanda(CreateComandaDto dto){
         int nextComandaNum = comandaRepository.findMaxComandaNum() + 1;
         Comanda comanda = Comanda.createComandaFromDto(dto);
         comanda.setComandaNum(nextComandaNum);
@@ -39,7 +39,7 @@ public class ComandaService {
             }
             pratoRepository.incrementarVendas(itens.getPratoId(), itens.getQtd());
         });
-        return comandaRepository.save(comanda);
+        return ResponseComandaDto.createComandaResponse(comandaRepository.save(comanda));
     }
 
     @Transactional(readOnly = true)

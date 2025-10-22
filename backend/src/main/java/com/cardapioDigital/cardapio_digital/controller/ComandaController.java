@@ -18,14 +18,12 @@ public class ComandaController {
 
     @GetMapping
     public ResponseEntity<List<ResponseComandaDto>> getAllComandas() {
-        List<ResponseComandaDto> lista = comandaService.getAllComandas();
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(comandaService.getAllComandas());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseComandaDto> getComandaById(@PathVariable Long id) {
-        ResponseComandaDto dto = comandaService.getComandaById(id);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(comandaService.getComandaById(id));
     }
 
     @DeleteMapping("/{id}")
@@ -36,7 +34,6 @@ public class ComandaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ResponseComandaDto> updateComandaById(@PathVariable Long id, @RequestBody UpdateComandaDto dto) {
-        ResponseComandaDto updated = comandaService.updateComanda(id, dto);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(comandaService.updateComanda(id, dto));
     }
 }

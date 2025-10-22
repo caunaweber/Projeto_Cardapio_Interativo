@@ -3,7 +3,6 @@ package com.cardapioDigital.cardapio_digital.controller;
 import com.cardapioDigital.cardapio_digital.dto.CreateComandaDto;
 import com.cardapioDigital.cardapio_digital.dto.ResponseComandaDto;
 import com.cardapioDigital.cardapio_digital.dto.ResponsePratoDto;
-import com.cardapioDigital.cardapio_digital.model.Comanda;
 import com.cardapioDigital.cardapio_digital.service.ComandaService;
 import com.cardapioDigital.cardapio_digital.service.PratoService;
 import jakarta.validation.Valid;
@@ -25,8 +24,7 @@ public class CardapioController {
 
     @PostMapping
     public ResponseEntity<ResponseComandaDto> createComanda(@RequestBody @Valid CreateComandaDto dto){
-        Comanda comanda = comandaService.createComanda(dto);
-        return ResponseEntity.ok().body(ResponseComandaDto.createComandaResponse(comanda));
+        return ResponseEntity.ok().body(comandaService.createComanda(dto));
     }
 
     @GetMapping
