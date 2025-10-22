@@ -86,13 +86,20 @@
 
     <MenuDialog v-model="dialog">
       <template #title>
-        {{ pratoEditando ? '✏️ Editar Prato' : '➕ Novo Prato' }}
+        {{ pratoEditando.id ? '✏️ Editar Prato' : '➕ Novo Prato' }}
       </template>
 
       <template #default>
         <v-form ref="formRef">
           <v-text-field v-model="pratoEditando.nome" label="Nome do prato" required />
-          <v-select v-model="pratoEditando.categoria" :items="categorias" label="Categoria" required />
+          <v-select
+              v-model="pratoEditando.categoria"
+              :items="categorias"
+              item-title="label"
+              item-value="value"
+              label="Categoria"
+              required
+            />
           <v-text-field
             v-model.number="pratoEditando.preco"
             label="Preço"
@@ -127,7 +134,7 @@
       v-model="confirmDialog"
       message="Tem certeza que deseja excluir este prato? Essa ação não pode ser desfeita."
       title="Remover prato"
-      @confirm="removerPrato(pratoSelecionado)"
+      @confirm="confirmarRemover"
     />
 
     <NavSidebar v-model="drawer" :pagina-atual="'pratos'" />
@@ -135,83 +142,104 @@
 </template>
 
 <script setup>
-  import { computed, reactive, ref, watch } from 'vue'
-  import { usePratosStore } from '@/stores/pratosStore'
+import { computed, reactive, ref, watch, onMounted } from 'vue'
+import { usePratosStore } from '@/stores/pratosStore'
 
-  const pratoStore = usePratosStore()
+const pratoStore = usePratosStore()
 
-  const drawer = ref(false)
-  const dialog = ref(false)
-  const confirmDialog = ref(false)
-  const pratoSelecionado = ref(null)
-  const pratoEditando = reactive({})
-  const search = ref('')
-  const filtroCategoria = ref('Todos')
-  const snackbar = reactive({ show: false, text: '', color: 'success' })
+const drawer = ref(false)
+const dialog = ref(false)
+const confirmDialog = ref(false)
+const pratoSelecionado = ref(null)
+const pratoEditando = reactive({})
+const search = ref('')
+const filtroCategoria = ref('Todos')
+const snackbar = reactive({ show: false, text: '', color: 'success' })
 
-  const headers = [
-    { title: 'Imagem', key: 'imagem', align: 'center' },
-    { title: 'Nome', key: 'nome' },
-    { title: 'Categoria', key: 'categoria' },
-    { title: 'Preço', key: 'preco', align: 'end' },
-    { title: 'Vendas', key: 'vendas', align: 'center' },
-    { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
-  ]
+const headers = [
+  { title: 'Imagem', key: 'imagem', align: 'center' },
+  { title: 'Nome', key: 'nome' },
+  { title: 'Categoria', key: 'categoria' },
+  { title: 'Preço', key: 'preco', align: 'end' },
+  { title: 'Vendas', key: 'vendas', align: 'center' },
+  { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
+]
 
-  const categorias = pratoStore.categorias
+const categorias = pratoStore.categorias
 
-  const pratosFiltrados = computed(() => {
-    if (filtroCategoria.value === 'Todos') return pratoStore.pratos
-    return pratoStore.pratos.filter(p => p.categoria === filtroCategoria.value)
-  })
+const pratosFiltrados = computed(() => {
+  if (filtroCategoria.value === 'Todos') return pratoStore.pratos
+  return pratoStore.pratos.filter(p => p.categoria === filtroCategoria.value)
+})
 
-  watch(() => pratoEditando.file, file => {
-    if (!file) return
-    const reader = new FileReader()
-    reader.addEventListener('load', e => pratoEditando.imagem = e.target.result)
-    reader.readAsDataURL(file)
-  })
+watch(() => pratoEditando.file, file => {
+  if (!file) return
+  const reader = new FileReader()
+  reader.addEventListener('load', e => pratoEditando.imagem = e.target.result)
+  reader.readAsDataURL(file)
+})
 
-  function abrirDialog (prato = null) {
-    if (prato) {
-      Object.assign(pratoEditando, { ...prato, file: prato.file || null })
-    } else {
-      Object.assign(pratoEditando, { id: null, nome: '', categoria: '', preco: 0, imagem: '', file: null, vendas: 0 })
-    }
-    dialog.value = true
+onMounted(async () => {
+  try {
+    await pratoStore.carregarPratos()
+  } catch (error) {
+    mostrarSnackbar('Erro ao carregar pratos', 'error')
+    console.error(error)
   }
+})
 
-  function salvarPrato () {
+function abrirDialog(prato = null) {
+  if (prato) {
+    Object.assign(pratoEditando, { ...prato, file: null })
+  } else {
+    Object.assign(pratoEditando, { id: null, nome: '', categoria: '', preco: 0, imagem: '', file: null, vendas: 0 })
+  }
+  dialog.value = true
+}
+
+async function salvarPrato() {
+  try {
     if (pratoEditando.id) {
-      pratoStore.atualizarPrato(pratoEditando)
+      await pratoStore.atualizarPrato(pratoEditando)
       mostrarSnackbar('Prato atualizado com sucesso!', 'success')
     } else {
-      pratoStore.adicionarPrato(pratoEditando)
+      await pratoStore.adicionarPrato(pratoEditando)
       mostrarSnackbar('Prato adicionado com sucesso!', 'success')
     }
     dialog.value = false
+  } catch (error) {
+    mostrarSnackbar('Erro ao salvar prato', 'error')
+    console.error(error)
   }
+}
 
-  function removerPrato (prato) {
-    pratoStore.removerPrato(prato.id)
+function abrirConfirm(prato) {
+  pratoSelecionado.value = prato
+  confirmDialog.value = true
+}
+
+async function confirmarRemover() {
+  if (!pratoSelecionado.value) return
+  try {
+    await pratoStore.removerPrato(pratoSelecionado.value.id)
     mostrarSnackbar('Prato removido com sucesso!', 'error')
+    confirmDialog.value = false
+  } catch (error) {
+    mostrarSnackbar('Erro ao remover prato', 'error')
+    console.error(error)
   }
+}
 
-  function abrirConfirm (prato) {
-    pratoSelecionado.value = prato
-    confirmDialog.value = true
-  }
+function mostrarSnackbar(text, color = 'success') {
+  snackbar.text = text
+  snackbar.color = color
+  snackbar.show = true
+}
 
-  function mostrarSnackbar (text, color = 'success') {
-    snackbar.text = text
-    snackbar.color = color
-    snackbar.show = true
-  }
-
-  function getImageSrc (imagem) {
-    if (!imagem) return '/no-image.png'
-    if (typeof imagem !== 'string') return '/no-image.png'
-    if (imagem.startsWith('data:') || imagem.startsWith('blob:') || imagem.startsWith('/') || imagem.startsWith('http')) return imagem
-    return '/' + imagem
-  }
+function getImageSrc(imagem) {
+  if (!imagem) return '/no-image.png'
+  if (typeof imagem !== 'string') return '/no-image.png'
+  if (imagem.startsWith('data:') || imagem.startsWith('blob:') || imagem.startsWith('/') || imagem.startsWith('http')) return imagem
+  return '/' + imagem
+}
 </script>

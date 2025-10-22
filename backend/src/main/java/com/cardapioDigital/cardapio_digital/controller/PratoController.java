@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -30,9 +31,12 @@ public class PratoController {
         return ResponseEntity.ok().body(pratoService.getPratoById(id));
     }
 
-    @PostMapping
-    public ResponseEntity<ResponsePratoDto> createPrato(@RequestBody @Valid CreatePratoDto dto) {
-        Prato prato = pratoService.createPrato(dto);
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<ResponsePratoDto> createPrato(
+            @RequestPart("dados") @Valid CreatePratoDto dto,
+            @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
+
+        Prato prato = pratoService.createPrato(dto, imagem);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponsePratoDto(prato));
     }
 

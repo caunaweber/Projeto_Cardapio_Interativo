@@ -29,8 +29,7 @@ public class Prato {
 
     public Prato(CreatePratoDto dto){
         this.nome = dto.nome();
-        this.categoria = dto.categoria();
-        this.imagem = dto.imagem();
+        this.categoria = dto.categoria();;
         this.preco = dto.preco();
     }
 

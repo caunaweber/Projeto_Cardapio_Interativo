@@ -1,32 +1,35 @@
 import { defineStore } from 'pinia'
+import { getPratos, criarPrato, atualizarPrato, removerPrato } from '@/services/pratos'
 
 export const usePratosStore = defineStore('pratos', {
   state: () => ({
-    pratos: [
-      { id: 1, nome: 'Prato 1', categoria: 'Prato Principal', preco: 25, imagem: 'image.png', vendas: 120 },
-      { id: 2, nome: 'Suco de Laranja', categoria: 'Bebida', preco: 12, imagem: 'suco.png', vendas: 80 },
-      { id: 3, nome: 'Petit Gateau', categoria: 'Sobremesa', preco: 20, imagem: '', vendas: 60 },
-    ],
-    categorias: ['Entrada', 'Prato Principal', 'Bebida', 'Sobremesa'],
+    pratos: [],
+    categorias: [
+      { label: 'Entrada', value: 'ENTRADA' },
+      { label: 'Prato Principal', value: 'PRATO_PRINCIPAL' },
+      { label: 'Bebida', value: 'BEBIDA' },
+      { label: 'Sobremesa', value: 'SOBREMESA' }
+    ]
   }),
-  getters: {
-    totalPratos: state => state.pratos.length,
-  },
+
   actions: {
-    adicionarPrato (prato) {
-      this.pratos.push({
-        ...prato,
-        id: this.pratos.length + 1,
-        vendas: 0,
-      })
+    async carregarPratos() {
+      this.pratos = await getPratos()
     },
-    atualizarPrato (pratoAtualizado) {
-      const index = this.pratos.findIndex(p => p.id === pratoAtualizado.id)
-      if (index !== -1) {
-        Object.assign(this.pratos[index], pratoAtualizado)
-      }
+
+    async adicionarPrato(prato) {
+      const novoPrato = await criarPrato(prato, prato.file)
+      this.pratos.push(novoPrato)
     },
-    removerPrato (id) {
+
+    async atualizarPrato(prato) {
+      const atualizado = await atualizarPrato(prato.id, prato)
+      const index = this.pratos.findIndex(p => p.id === atualizado.id)
+      if (index !== -1) this.pratos[index] = atualizado
+    },
+
+    async removerPrato(id) {
+      await removerPrato(id)
       this.pratos = this.pratos.filter(p => p.id !== id)
     },
   },
