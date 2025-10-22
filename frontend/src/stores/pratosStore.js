@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getPratos, criarPrato, atualizarPrato, removerPrato } from '@/services/pratos'
+import { atualizarPrato, criarPrato, getPratos, removerPrato } from '@/services/pratosService'
 
 export const usePratosStore = defineStore('pratos', {
   state: () => ({
@@ -8,27 +8,39 @@ export const usePratosStore = defineStore('pratos', {
       { label: 'Entrada', value: 'ENTRADA' },
       { label: 'Prato Principal', value: 'PRATO_PRINCIPAL' },
       { label: 'Bebida', value: 'BEBIDA' },
-      { label: 'Sobremesa', value: 'SOBREMESA' }
-    ]
+      { label: 'Sobremesa', value: 'SOBREMESA' },
+    ],
   }),
 
   actions: {
-    async carregarPratos() {
+    async carregarPratos () {
       this.pratos = await getPratos()
     },
 
-    async adicionarPrato(prato) {
-      const novoPrato = await criarPrato(prato, prato.file)
+    async adicionarPrato (prato) {
+      const dadosPayload = {
+        nome: prato.nome,
+        categoria: prato.categoria,
+        preco: prato.preco,
+      }
+      const novoPrato = await criarPrato(dadosPayload, prato.file)
       this.pratos.push(novoPrato)
     },
 
-    async atualizarPrato(prato) {
-      const atualizado = await atualizarPrato(prato.id, prato)
+    async atualizarPrato (prato) {
+      const dadosPayload = {
+        nome: prato.nome,
+        categoria: prato.categoria,
+        preco: prato.preco,
+      }
+      const atualizado = await atualizarPrato(prato.id, dadosPayload, prato.file)
       const index = this.pratos.findIndex(p => p.id === atualizado.id)
-      if (index !== -1) this.pratos[index] = atualizado
+      if (index !== -1) {
+        this.pratos[index] = atualizado
+      }
     },
 
-    async removerPrato(id) {
+    async removerPrato (id) {
       await removerPrato(id)
       this.pratos = this.pratos.filter(p => p.id !== id)
     },

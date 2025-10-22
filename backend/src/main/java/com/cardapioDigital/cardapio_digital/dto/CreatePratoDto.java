@@ -6,10 +6,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record CreatePratoDto(
-        @NotBlank
+        @NotBlank(message = "O nome não pode ser vazio")
         String nome,
-        @NotNull
-        Double preco,
-        @NotNull
-        Categoria categoria
+
+        @NotNull(message = "A categoria não pode ser nula")
+        Categoria categoria,
+
+        @NotNull(message = "O preço não pode ser nulo")
+        @Min(value = 0, message = "O preço não pode ser negativo")
+        Double preco
 ) {}

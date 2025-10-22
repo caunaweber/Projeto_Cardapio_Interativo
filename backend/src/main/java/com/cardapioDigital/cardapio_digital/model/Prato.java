@@ -40,9 +40,6 @@ public class Prato {
         if(dto.categoria() != null){
             this.categoria = dto.categoria();
         }
-        if(dto.imagem() != null){
-            this.imagem = dto.imagem();
-        }
         if(dto.preco() != null){
             this.preco = dto.preco();
         }

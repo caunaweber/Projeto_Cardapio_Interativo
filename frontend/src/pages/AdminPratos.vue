@@ -30,7 +30,9 @@
           <v-select
             v-model="filtroCategoria"
             hide-details
-            :items="['Todos', ...categorias]"
+            item-title="label"
+            item-value="value"
+            :items="categoriasComTodos"
             label="Filtrar por categoria"
             prepend-inner-icon="mdi-filter"
             rounded="xl"
@@ -55,6 +57,10 @@
 
         <template #item.preco="{ item }">
           R$ {{ Number(item.preco).toFixed(2) }}
+        </template>
+
+        <template #item.categoria="{ item }">
+          {{ getCategoriaLabel(item.categoria) }}
         </template>
 
         <template #item.vendas="{ item }">
@@ -91,20 +97,24 @@
 
       <template #default>
         <v-form ref="formRef">
-          <v-text-field v-model="pratoEditando.nome" label="Nome do prato" required />
+          <v-text-field
+            v-model="pratoEditando.nome"
+            label="Nome do prato"
+            :rules="[rules.required]"
+          />
           <v-select
-              v-model="pratoEditando.categoria"
-              :items="categorias"
-              item-title="label"
-              item-value="value"
-              label="Categoria"
-              required
-            />
+            v-model="pratoEditando.categoria"
+            item-title="label"
+            item-value="value"
+            :items="categorias"
+            label="Categoria"
+            :rules="[rules.required]"
+          />
           <v-text-field
             v-model.number="pratoEditando.preco"
             label="Preço"
             prefix="R$"
-            required
+            :rules="[rules.required, rules.minZero]"
             step="0.01"
             type="number"
           />
@@ -142,104 +152,172 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch, onMounted } from 'vue'
-import { usePratosStore } from '@/stores/pratosStore'
+  import { computed, onMounted, reactive, ref, watch } from 'vue'
+  import { usePratosStore } from '@/stores/pratosStore'
 
-const pratoStore = usePratosStore()
+  const pratoStore = usePratosStore()
 
-const drawer = ref(false)
-const dialog = ref(false)
-const confirmDialog = ref(false)
-const pratoSelecionado = ref(null)
-const pratoEditando = reactive({})
-const search = ref('')
-const filtroCategoria = ref('Todos')
-const snackbar = reactive({ show: false, text: '', color: 'success' })
+  const drawer = ref(false)
+  const dialog = ref(false)
+  const confirmDialog = ref(false)
+  const pratoSelecionado = ref(null)
+  const search = ref('')
+  const filtroCategoria = ref('TODOS')
+  const snackbar = reactive({ show: false, text: '', color: 'success' })
+  const formRef = ref(null)
 
-const headers = [
-  { title: 'Imagem', key: 'imagem', align: 'center' },
-  { title: 'Nome', key: 'nome' },
-  { title: 'Categoria', key: 'categoria' },
-  { title: 'Preço', key: 'preco', align: 'end' },
-  { title: 'Vendas', key: 'vendas', align: 'center' },
-  { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
-]
-
-const categorias = pratoStore.categorias
-
-const pratosFiltrados = computed(() => {
-  if (filtroCategoria.value === 'Todos') return pratoStore.pratos
-  return pratoStore.pratos.filter(p => p.categoria === filtroCategoria.value)
-})
-
-watch(() => pratoEditando.file, file => {
-  if (!file) return
-  const reader = new FileReader()
-  reader.addEventListener('load', e => pratoEditando.imagem = e.target.result)
-  reader.readAsDataURL(file)
-})
-
-onMounted(async () => {
-  try {
-    await pratoStore.carregarPratos()
-  } catch (error) {
-    mostrarSnackbar('Erro ao carregar pratos', 'error')
-    console.error(error)
+  const rules = {
+    required: value => {
+      if (value === 0) return true
+      return !!value || 'Este campo é obrigatório.'
+    },
+    minZero: value => value >= 0 || 'O preço não pode ser negativo.',
   }
-})
 
-function abrirDialog(prato = null) {
-  if (prato) {
-    Object.assign(pratoEditando, { ...prato, file: null })
-  } else {
-    Object.assign(pratoEditando, { id: null, nome: '', categoria: '', preco: 0, imagem: '', file: null, vendas: 0 })
+  const pratoEditando = reactive(resetPrato())
+
+  const headers = [
+    { title: 'Imagem', key: 'imagem', align: 'center' },
+    { title: 'Nome', key: 'nome' },
+    { title: 'Categoria', key: 'categoria' },
+    { title: 'Preço', key: 'preco', align: 'end' },
+    { title: 'Vendas', key: 'vendas', align: 'center' },
+    { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
+  ]
+
+  const categorias = pratoStore.categorias
+
+  const categoriasComTodos = computed(() => [
+    { label: 'Todos', value: 'TODOS' },
+    ...pratoStore.categorias,
+  ])
+
+  function getCategoriaLabel (value) {
+    const cat = pratoStore.categorias.find(c => c.value === value)
+    return cat ? cat.label : value
   }
-  dialog.value = true
-}
 
-async function salvarPrato() {
-  try {
-    if (pratoEditando.id) {
-      await pratoStore.atualizarPrato(pratoEditando)
-      mostrarSnackbar('Prato atualizado com sucesso!', 'success')
-    } else {
-      await pratoStore.adicionarPrato(pratoEditando)
-      mostrarSnackbar('Prato adicionado com sucesso!', 'success')
+  const pratosFiltrados = computed(() => {
+    if (filtroCategoria.value === 'TODOS') return pratoStore.pratos
+    return pratoStore.pratos.filter(p => p.categoria === filtroCategoria.value)
+  })
+
+  watch(() => pratoEditando.file, file => {
+    if (!file) return
+    const reader = new FileReader()
+    reader.addEventListener('load', e => (pratoEditando.imagem = e.target.result))
+    reader.readAsDataURL(file)
+  })
+
+  onMounted(async () => {
+    try {
+      await pratoStore.carregarPratos()
+    } catch (error) {
+      let mensagem = 'Erro ao carregar pratos'
+      if (error.response?.data) {
+        const data = error.response.data
+
+        if (Array.isArray(data) && data.length > 0) {
+          mensagem = `[${data[0].field}]: ${data[0].message}`
+        } else if (data.message) {
+          mensagem = data.message
+        }
+      }
+      mostrarSnackbar(mensagem, 'error')
+      console.error(error)
     }
-    dialog.value = false
-  } catch (error) {
-    mostrarSnackbar('Erro ao salvar prato', 'error')
-    console.error(error)
+  })
+
+  function resetPrato () {
+    return {
+      id: null,
+      nome: '',
+      categoria: '',
+      preco: 0,
+      imagem: '',
+      file: null,
+      vendas: 0,
+    }
   }
-}
 
-function abrirConfirm(prato) {
-  pratoSelecionado.value = prato
-  confirmDialog.value = true
-}
-
-async function confirmarRemover() {
-  if (!pratoSelecionado.value) return
-  try {
-    await pratoStore.removerPrato(pratoSelecionado.value.id)
-    mostrarSnackbar('Prato removido com sucesso!', 'error')
-    confirmDialog.value = false
-  } catch (error) {
-    mostrarSnackbar('Erro ao remover prato', 'error')
-    console.error(error)
+  function abrirDialog (prato = null) {
+    if (prato) {
+      Object.assign(pratoEditando, { ...resetPrato(), ...prato })
+    } else {
+      Object.assign(pratoEditando, resetPrato())
+    }
+    dialog.value = true
   }
-}
 
-function mostrarSnackbar(text, color = 'success') {
-  snackbar.text = text
-  snackbar.color = color
-  snackbar.show = true
-}
+  async function salvarPrato () {
+    try {
+      const { valid } = await formRef.value.validate()
+      if (!valid) {
+        mostrarSnackbar('Por favor, preencha todos os campos obrigatórios.', 'error')
+        return
+      }
+      if (pratoEditando.id) {
+        await pratoStore.atualizarPrato(pratoEditando)
+        mostrarSnackbar('Prato atualizado com sucesso!')
+      } else {
+        await pratoStore.adicionarPrato(pratoEditando)
+        mostrarSnackbar('Prato adicionado com sucesso!')
+      }
 
-function getImageSrc(imagem) {
-  if (!imagem) return '/no-image.png'
-  if (typeof imagem !== 'string') return '/no-image.png'
-  if (imagem.startsWith('data:') || imagem.startsWith('blob:') || imagem.startsWith('/') || imagem.startsWith('http')) return imagem
-  return '/' + imagem
-}
+      dialog.value = false
+      Object.assign(pratoEditando, resetPrato())
+    } catch (error) {
+      let mensagem = 'Erro ao salvar prato'
+      if (error.response?.data) {
+        const data = error.response.data
+
+        if (Array.isArray(data) && data.length > 0) {
+          mensagem = `[${data[0].field}]: ${data[0].message}`
+        } else if (data.message) {
+          mensagem = data.message
+        }
+      }
+      mostrarSnackbar(mensagem, 'error')
+      console.error(error)
+    }
+  }
+
+  function abrirConfirm (prato) {
+    pratoSelecionado.value = prato
+    confirmDialog.value = true
+  }
+
+  async function confirmarRemover () {
+    if (!pratoSelecionado.value) return
+    try {
+      await pratoStore.removerPrato(pratoSelecionado.value.id)
+      mostrarSnackbar('Prato removido com sucesso!')
+      confirmDialog.value = false
+    } catch (error) {
+      let mensagem = 'Erro ao remover pratos'
+      if (error.response?.data) {
+        const data = error.response.data
+
+        if (Array.isArray(data) && data.length > 0) {
+          mensagem = `[${data[0].field}]: ${data[0].message}`
+        } else if (data.message) {
+          mensagem = data.message
+        }
+      }
+      mostrarSnackbar(mensagem, 'error')
+      console.error(error)
+    }
+  }
+
+  function mostrarSnackbar (text, color = 'success') {
+    snackbar.text = text
+    snackbar.color = color
+    snackbar.show = true
+  }
+
+  function getImageSrc (imagem) {
+    if (!imagem) return '/no-image.png'
+    return `http://localhost:8080/uploads/${imagem}`
+  }
+
 </script>

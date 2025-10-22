@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { createOrReturnDevice, generateDeviceId, validateDevice, verifyDevice } from '@/services/device'
+import { createOrReturnDevice, generateDeviceId, validateDevice, verifyDevice } from '@/services/deviceService'
 
 export const useDeviceStore = defineStore('device', {
   state: () => ({
