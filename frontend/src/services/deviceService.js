@@ -1,11 +1,11 @@
 import { api } from './api'
 
 export async function createOrReturnDevice (deviceId) {
-  return api.post('/aparelhos', { deviceId })
+  return api.post('/cardapio/register', { deviceId })
 }
 
 export async function verifyDevice (deviceId) {
-  const { data } = await api.get(`/aparelhos/verify/${deviceId}`)
+  const { data } = await api.get(`/cardapio/verify/${deviceId}`)
   return data
 }
 

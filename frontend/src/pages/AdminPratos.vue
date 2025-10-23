@@ -14,6 +14,8 @@
       </template>
     </MenuAppBar>
 
+    <NavSidebar v-model="drawer" :pagina-atual="'pratos'" />
+
     <v-container class="py-6">
       <v-row class="mb-4">
         <v-col cols="12" md="9">
@@ -47,11 +49,12 @@
         :headers="headers"
         item-value="id"
         :items="pratosFiltrados"
+        :items-per-page="10"
         :search="search"
       >
         <template #item.imagem="{ item }">
           <v-avatar class="my-1" rounded size="70">
-            <v-img :src="getImageSrc(item.imagem)" />
+            <v-img aspect-ratio="1" cover :src="getImageSrc(item.imagem)" />
           </v-avatar>
         </template>
 
@@ -68,25 +71,36 @@
         </template>
 
         <template #item.acoes="{ item }">
-          <v-btn
-            color="primary"
-            icon
-            size="small"
-            variant="text"
-            @click="abrirDialog(item)"
-          >
-            <v-icon>mdi-pencil</v-icon>
-          </v-btn>
-          <v-btn
-            color="error"
-            icon
-            size="small"
-            variant="text"
-            @click="abrirConfirm(item)"
-          >
-            <v-icon>mdi-delete</v-icon>
-          </v-btn>
+          <v-tooltip text="Editar">
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                color="primary"
+                icon
+                size="small"
+                variant="text"
+                @click="abrirDialog(item)"
+              >
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip text="Remover">
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                color="error"
+                icon
+                size="small"
+                variant="text"
+                @click="abrirConfirm(item)"
+              >
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
         </template>
+
         <template #no-data>
           <v-alert border="start" class="ma-4" type="info">
             Nenhum prato encontrado.
@@ -123,10 +137,22 @@
             step="0.01"
             type="number"
           />
+
+          <v-row v-if="pratoEditando.imagem && pratoEditando.imagem !== '/no-image.png'" class="mb-4 align-center">
+            <v-col cols="auto">
+              <v-avatar rounded size="80">
+                <v-img aspect-ratio="1" cover :src="pratoEditando.imagem" />
+              </v-avatar>
+            </v-col>
+            <v-col>
+              <span class="text-caption">Imagem Atual</span>
+            </v-col>
+          </v-row>
           <v-file-input
             v-model="pratoEditando.file"
             accept="image/*"
-            label="Imagem do prato"
+            clearable
+            :label="pratoEditando.id ? 'Substituir imagem (opcional)' : 'Imagem do prato'"
             outlined
             prepend-icon="mdi-image"
           />
@@ -182,7 +208,7 @@
   const pratoEditando = reactive(resetPrato())
 
   const headers = [
-    { title: 'Imagem', key: 'imagem', align: 'center' },
+    { title: 'Imagem', key: 'imagem', align: 'center', sortable: false },
     { title: 'Nome', key: 'nome' },
     { title: 'Categoria', key: 'categoria' },
     { title: 'Preço', key: 'preco', align: 'end' },
@@ -207,11 +233,24 @@
     return pratoStore.pratos.filter(p => p.categoria === filtroCategoria.value)
   })
 
-  watch(() => pratoEditando.file, file => {
-    if (!file) return
-    const reader = new FileReader()
-    reader.addEventListener('load', e => (pratoEditando.imagem = e.target.result))
-    reader.readAsDataURL(file)
+  watch(() => pratoEditando.file, newFile => {
+    const file = Array.isArray(newFile) ? newFile[0] : newFile
+
+    if (file) {
+      pratoEditando.file = file
+      const reader = new FileReader()
+      reader.addEventListener('load', e => (pratoEditando.imagem = e.target.result))
+      reader.readAsDataURL(file)
+    } else {
+      pratoEditando.file = null
+
+      if (pratoEditando.id) {
+        const pratoOriginal = pratoStore.pratos.find(p => p.id === pratoEditando.id)
+        pratoEditando.imagem = pratoOriginal?.imagem ? getImageSrc(pratoOriginal.imagem) : '/no-image.png'
+      } else {
+        pratoEditando.imagem = '/no-image.png'
+      }
+    }
   })
 
   onMounted(async () => {
@@ -221,7 +260,6 @@
       let mensagem = 'Erro ao carregar pratos'
       if (error.response?.data) {
         const data = error.response.data
-
         if (Array.isArray(data) && data.length > 0) {
           mensagem = `[${data[0].field}]: ${data[0].message}`
         } else if (data.message) {
@@ -237,7 +275,7 @@
     return {
       id: null,
       nome: '',
-      categoria: '',
+      categoria: null,
       preco: 0,
       imagem: '',
       file: null,
@@ -246,10 +284,15 @@
   }
 
   function abrirDialog (prato = null) {
+    Object.assign(pratoEditando, resetPrato())
     if (prato) {
-      Object.assign(pratoEditando, { ...resetPrato(), ...prato })
+      Object.assign(pratoEditando, {
+        ...prato,
+        file: null,
+        imagem: prato.imagem ? getImageSrc(prato.imagem) : '/no-image.png',
+      })
     } else {
-      Object.assign(pratoEditando, resetPrato())
+      pratoEditando.imagem = '/no-image.png'
     }
     dialog.value = true
   }
@@ -261,6 +304,7 @@
         mostrarSnackbar('Por favor, preencha todos os campos obrigatórios.', 'error')
         return
       }
+
       if (pratoEditando.id) {
         await pratoStore.atualizarPrato(pratoEditando)
         mostrarSnackbar('Prato atualizado com sucesso!')
@@ -275,7 +319,6 @@
       let mensagem = 'Erro ao salvar prato'
       if (error.response?.data) {
         const data = error.response.data
-
         if (Array.isArray(data) && data.length > 0) {
           mensagem = `[${data[0].field}]: ${data[0].message}`
         } else if (data.message) {
@@ -296,13 +339,11 @@
     if (!pratoSelecionado.value) return
     try {
       await pratoStore.removerPrato(pratoSelecionado.value.id)
-      mostrarSnackbar('Prato removido com sucesso!')
-      confirmDialog.value = false
+      mostrarSnackbar('Prato removido com sucesso!', 'success')
     } catch (error) {
-      let mensagem = 'Erro ao remover pratos'
+      let mensagem = 'Erro ao remover prato'
       if (error.response?.data) {
         const data = error.response.data
-
         if (Array.isArray(data) && data.length > 0) {
           mensagem = `[${data[0].field}]: ${data[0].message}`
         } else if (data.message) {
@@ -311,6 +352,9 @@
       }
       mostrarSnackbar(mensagem, 'error')
       console.error(error)
+    } finally {
+      confirmDialog.value = false
+      pratoSelecionado.value = null
     }
   }
 
@@ -321,7 +365,10 @@
   }
 
   function getImageSrc (imagem) {
-    if (!imagem) return '/no-image.png'
+    if (!imagem || imagem === '/no-image.png') return '/no-im<ctrl61>age.png'
+    if (imagem.startsWith('data:') || imagem.startsWith('http')) {
+      return imagem
+    }
     return `http://localhost:8080/uploads/${imagem}`
   }
 

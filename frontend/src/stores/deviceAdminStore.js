@@ -17,11 +17,7 @@ export const useDeviceAdminStore = defineStore('deviceAdmin', {
     },
 
     async atualizarAparelho (aparelho) {
-      const dadosPayload = {
-        mesaNum: aparelho.mesaNum,
-      }
-
-      const atualizado = await updateAparelho(aparelho.id, dadosPayload)
+      const atualizado = await updateAparelho(aparelho.id, aparelho)
 
       const index = this.aparelhos.findIndex(a => a.id === atualizado.id)
       if (index !== -1) {
