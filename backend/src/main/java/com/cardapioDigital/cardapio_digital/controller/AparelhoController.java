@@ -2,6 +2,7 @@ package com.cardapioDigital.cardapio_digital.controller;
 
 import com.cardapioDigital.cardapio_digital.dto.CreateAparelhoDto;
 import com.cardapioDigital.cardapio_digital.dto.ResponseAparelhoDto;
+import com.cardapioDigital.cardapio_digital.dto.UpdateAparelhoDto;
 import com.cardapioDigital.cardapio_digital.dto.ValidateAparelhoDto;
 import com.cardapioDigital.cardapio_digital.model.Aparelho;
 import com.cardapioDigital.cardapio_digital.service.AparelhoService;
@@ -41,10 +42,26 @@ public class AparelhoController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/invalidate/{id}")
+    public ResponseEntity<ResponseAparelhoDto> invalidateAparelho(@PathVariable Long id) {
+        return ResponseEntity.ok(aparelhoService.invalidateAparelho(id));
+    }
+
     @PostMapping
     public ResponseEntity<ResponseAparelhoDto> create(@RequestBody @Valid CreateAparelhoDto dto) {
         Aparelho aparelho = aparelhoService.createOrReturnAparelho(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseAparelhoDto(aparelho));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseAparelhoDto> update(@PathVariable Long id, @RequestBody @Valid UpdateAparelhoDto dto) {
+        return ResponseEntity.ok().body(aparelhoService.updateAparelho(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        aparelhoService.deleteAparelho(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

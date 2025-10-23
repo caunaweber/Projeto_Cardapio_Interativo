@@ -87,6 +87,11 @@
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
+        <template #no-data>
+          <v-alert border="start" class="ma-4" type="info">
+            Nenhum prato encontrado.
+          </v-alert>
+        </template>
       </v-data-table>
     </v-container>
 

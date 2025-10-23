@@ -12,12 +12,25 @@
 
     <v-container class="py-6">
       <v-row class="mb-4">
-        <v-col cols="12" md="12">
+        <v-col cols="12" md="9">
           <v-text-field
             v-model="search"
             hide-details
             label="Pesquisar aparelhos..."
             prepend-inner-icon="mdi-magnify"
+            rounded="xl"
+            variant="outlined"
+          />
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-select
+            v-model="filtroStatus"
+            hide-details
+            item-title="label"
+            item-value="value"
+            :items="statusComTodos"
+            label="Filtrar por status"
+            prepend-inner-icon="mdi-filter"
             rounded="xl"
             variant="outlined"
           />
@@ -30,15 +43,44 @@
         :headers="headers"
         :items="aparelhosFiltrados"
         :items-per-page="10"
-        :search="search"
       >
         <template #item.mesaNum="{ item }">
           Mesa {{ item.mesaNum ?? '—' }}
         </template>
 
-        <template #item.dataRegistro="{ item }">
-          <span>{{ formatarData(item.dataRegistro) }}</span>
+        <template #item.dataRegistry="{ item }">
+          <span>{{ formatarData(item.dataRegistry) }}</span>
         </template>
+
+        <template #item.validated="{ item }">
+          <div class="d-flex align-center justify-start">
+            <v-chip
+              :color="item.validated ? 'success' : 'error'"
+              :prepend-icon="item.validated ? 'mdi-check-circle' : 'mdi-alert-circle'"
+              size="small"
+              variant="flat"
+            >
+              {{ item.validated ? 'Validado' : 'Pendente' }}
+            </v-chip>
+
+            <v-tooltip location="top" text="Invalidar Acesso">
+              <template #activator="{ props }">
+                <v-btn
+                  v-if="item.validated"
+                  v-bind="props"
+                  class="ml-1"
+                  color="warning"
+                  icon
+                  size="x-small"
+                  variant="text"
+                  @click.stop="abrirConfirmInvalidar(item)"
+                >
+                  <v-icon>mdi-lock-reset</v-icon>
+                </v-btn>
+              </template>
+            </v-tooltip>
+
+          </div> </template>
 
         <template #item.deviceId="{ item }">
           <v-chip
@@ -86,7 +128,7 @@
         </template>
 
         <template #no-data>
-          <v-alert border="start" class="ma-4" type="primary">
+          <v-alert border="start" class="ma-4" type="info">
             Nenhum aparelho encontrado.
           </v-alert>
         </template>
@@ -99,9 +141,10 @@
       <template #default>
         <v-form ref="formRef">
           <v-text-field
-            v-model="form.mesaNum"
+            v-model.number="form.mesaNum"
+            clearable
             label="Número da Mesa"
-            required
+            :rules="[rules.minUmOuNulo]"
             type="number"
           />
           <v-text-field
@@ -123,75 +166,176 @@
     </v-snackbar>
 
     <ConfirmDialog
-      v-model="confirmDialog"
+      v-model="confirmDialogRemover"
       message="Tem certeza que deseja excluir este aparelho? Essa ação não pode ser desfeita."
       title="Remover aparelho"
-      @confirm="removerAparelho(aparelhoSelecionado)"
+      @confirm="confirmarRemover"
+    />
+
+    <ConfirmDialog
+      v-model="confirmDialogInvalidar"
+      confirm-button-color="warning"
+      confirm-button-text="Invalidar"
+      message="Tem certeza que deseja invalidar o acesso deste aparelho? Ele precisará ser validado novamente com a chave secreta para voltar a funcionar."
+      title="Invalidar Aparelho"
+      @confirm="confirmarInvalidar"
     />
   </v-container>
 </template>
 
 <script setup>
-  import { computed, reactive, ref } from 'vue'
-  import { useAparelhosStore } from '@/stores/aparelhosStore'
+  import { computed, onMounted, reactive, ref } from 'vue'
+  import { useDeviceAdminStore } from '@/stores/deviceAdminStore'
 
   const drawer = ref(false)
   const search = ref('')
   const dialog = ref(false)
   const aparelhoSelecionado = ref(null)
-  const confirmDialog = ref(false)
+  const confirmDialogRemover = ref(false)
+  const confirmDialogInvalidar = ref(false)
+  const snackbar = reactive({ show: false, text: '', color: 'success' })
+  const formRef = ref(null)
 
-  const aparelhosStore = useAparelhosStore()
+  const deviceAdminStore = useDeviceAdminStore()
 
   const headers = [
     { title: 'Número da Mesa', key: 'mesaNum' },
     { title: 'Device ID', key: 'deviceId', align: 'center' },
-    { title: 'Data de Criação', key: 'dataRegistro', align: 'center' },
+    { title: 'Data de Criação', key: 'dataRegistry', align: 'center' },
+    { title: 'Status', key: 'validated', align: 'center' },
     { title: 'Ações', key: 'acoes', align: 'center', sortable: false },
   ]
 
+  const rules = {
+    required: value => {
+      if (value === 0) return true
+      return !!value || 'Este campo é obrigatório.'
+    },
+    minUmOuNulo: value =>
+      (!value && value !== 0) || value >= 1 || 'O número da mesa deve ser 1 ou maior.',
+  }
+
+  const filtroStatus = ref('TODOS')
+
+  const statusComTodos = computed(() => [
+    { label: 'Todos', value: 'TODOS' },
+    { label: 'Validado', value: true },
+    { label: 'Pendente', value: false },
+  ])
+
   const aparelhosFiltrados = computed(() => {
-    if (!search.value) return aparelhosStore.aparelhos
-    const termo = search.value.toLowerCase()
-    return aparelhosStore.aparelhos.filter(a =>
-      a.mesaNum?.toString().includes(termo)
-      || a.deviceId?.toLowerCase().includes(termo),
-    )
+    let items = deviceAdminStore.aparelhos
+
+    if (filtroStatus.value !== 'TODOS') {
+      items = items.filter(a => a.validated === filtroStatus.value)
+    }
+
+    if (search.value) {
+      const termo = search.value.toLowerCase()
+      items = items.filter(a =>
+        a.mesaNum?.toString().includes(termo)
+        || a.deviceId?.toLowerCase().includes(termo),
+      )
+    }
+
+    return items
   })
 
-  const formRef = ref(null)
   const form = reactive({
     id: null,
     mesaNum: null,
     deviceId: '',
   })
 
+  onMounted(async () => {
+    try {
+      await deviceAdminStore.carregarAparelhos()
+    } catch (error) {
+      const mensagem = error.response?.data?.message || 'Erro ao carregar aparelhos'
+      mostrarSnackbar(mensagem, 'error')
+      console.error(error)
+    }
+  })
+
   function abrirDialog (aparelho) {
     aparelhoSelecionado.value = aparelho
-    Object.assign(form, aparelho)
+    Object.assign(form, { ...aparelho })
     dialog.value = true
   }
 
   async function salvarEdicao () {
-    const isValid = await formRef.value?.validate()
-    if (!isValid) {
-      mostrarSnackbar('Preencha todos os campos obrigatórios!', 'error')
+    const { valid } = await formRef.value.validate()
+    if (!valid) {
+      mostrarSnackbar('Por favor, preencha os campos obrigatórios.', 'error')
       return
     }
 
-    aparelhosStore.atualizarAparelho({ ...form })
-    mostrarSnackbar('Aparelho atualizado com sucesso!', 'success')
-    dialog.value = false
+    try {
+      await deviceAdminStore.atualizarAparelho({ ...form })
+      mostrarSnackbar('Aparelho atualizado com sucesso!', 'success')
+      dialog.value = false
+    } catch (error) {
+      let mensagem = 'Erro ao salvar aparelho'
+      if (error.response?.data) {
+        const data = error.response.data
+        if (Array.isArray(data) && data.length > 0) {
+          mensagem = `[${data[0].field}]: ${data[0].message}`
+        } else if (data.message) {
+          mensagem = data.message
+        }
+      }
+      mostrarSnackbar(mensagem, 'error')
+      console.error(error)
+    }
   }
 
   function abrirConfirm (aparelho) {
     aparelhoSelecionado.value = aparelho
-    confirmDialog.value = true
+    confirmDialogRemover.value = true
   }
 
-  function removerAparelho (aparelho) {
-    aparelhosStore.removerAparelho(aparelho.id)
-    mostrarSnackbar('Aparelho removido com sucesso!', 'error')
+  async function confirmarRemover () {
+    if (!aparelhoSelecionado.value) return
+
+    try {
+      await deviceAdminStore.removerAparelho(aparelhoSelecionado.value.id)
+      mostrarSnackbar('Aparelho removido com sucesso!', 'success')
+    } catch (error) {
+      let mensagem = 'Erro ao remover aparelho'
+      if (error.response?.data) {
+        const data = error.response.data
+        if (Array.isArray(data) && data.length > 0) {
+          mensagem = `[${data[0].field}]: ${data[0].message}`
+        } else if (data.message) {
+          mensagem = data.message
+        }
+      }
+      mostrarSnackbar(mensagem, 'error')
+      console.error(error)
+    } finally {
+      confirmDialog.value = false
+      aparelhoSelecionado.value = null
+    }
+  }
+
+  function abrirConfirmInvalidar (aparelho) {
+    aparelhoSelecionado.value = aparelho
+    confirmDialogInvalidar.value = true
+  }
+
+  async function confirmarInvalidar () {
+    if (!aparelhoSelecionado.value) return
+    try {
+      await deviceAdminStore.invalidarAparelho(aparelhoSelecionado.value.id)
+      mostrarSnackbar('Acesso do aparelho invalidado com sucesso!', 'warning') // Snackbar amarelo
+    } catch (error) {
+      const mensagem = error.response?.data?.message || 'Erro ao invalidar aparelho'
+      mostrarSnackbar(mensagem, 'error')
+      console.error(error)
+    } finally {
+      confirmDialogInvalidar.value = false
+      aparelhoSelecionado.value = null
+    }
   }
 
   function mostrarSnackbar (text, color = 'success') {
@@ -208,6 +352,4 @@
       year: 'numeric',
     })
   }
-
-  const snackbar = reactive({ show: false, text: '', color: 'success' })
 </script>

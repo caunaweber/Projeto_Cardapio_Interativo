@@ -2,6 +2,7 @@ package com.cardapioDigital.cardapio_digital.service;
 
 import com.cardapioDigital.cardapio_digital.dto.CreateAparelhoDto;
 import com.cardapioDigital.cardapio_digital.dto.ResponseAparelhoDto;
+import com.cardapioDigital.cardapio_digital.dto.UpdateAparelhoDto;
 import com.cardapioDigital.cardapio_digital.model.Aparelho;
 import com.cardapioDigital.cardapio_digital.repository.AparelhoRepository;
 import jakarta.annotation.PostConstruct;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,7 +77,38 @@ public class AparelhoService {
         }
 
         aparelho.setValidated(true);
-        aparelhoRepository.save(aparelho);
+    }
+
+    @Transactional
+    public ResponseAparelhoDto invalidateAparelho(Long id) {
+        Aparelho aparelho = aparelhoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aparelho não encontrado"));
+        aparelho.setValidated(false);
+        return new ResponseAparelhoDto(aparelho);
+    }
+
+    @Transactional
+    public ResponseAparelhoDto updateAparelho(Long id, UpdateAparelhoDto dto) {
+        Aparelho aparelho = aparelhoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aparelho não encontado"));
+
+        if(dto.mesaNum() != null ){
+            Optional<Aparelho> outroAparelho = aparelhoRepository.findByMesaNum(dto.mesaNum());
+            if (outroAparelho.isPresent() && !outroAparelho.get().getId().equals(id)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Mesa " + dto.mesaNum() + " já está em uso por outro aparelho.");
+            }
+        }
+
+        aparelho.update(dto);
+        return new ResponseAparelhoDto(aparelho);
+    }
+
+    @Transactional
+    public void deleteAparelho(Long id) {
+        if (!aparelhoRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Aparelho não encontrado");
+        }
+        aparelhoRepository.deleteById(id);
     }
 
 }

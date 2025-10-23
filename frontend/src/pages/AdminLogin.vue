@@ -62,24 +62,24 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore'
+  import { ref } from 'vue'
+  import { useRouter } from 'vue-router'
+  import { useAuthStore } from '@/stores/authStore'
 
-const router = useRouter()
-const email = ref('')
-const senha = ref('')
-const erro = ref('')
+  const router = useRouter()
+  const email = ref('')
+  const senha = ref('')
+  const erro = ref('')
 
-const auth = useAuthStore()
+  const auth = useAuthStore()
 
-function fazerLogin() {
-  if (auth.login(email.value, senha.value)) {
-    router.push({ name: 'AdminMetricas' })
-  } else {
-    erro.value = 'Email ou senha incorretos.'
+  function fazerLogin () {
+    if (auth.login(email.value, senha.value)) {
+      router.push({ name: 'AdminMetricas' })
+    } else {
+      erro.value = 'Email ou senha incorretos.'
+    }
   }
-}
 </script>
 
 <style scoped>

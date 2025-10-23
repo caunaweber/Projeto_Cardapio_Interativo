@@ -1,6 +1,7 @@
 package com.cardapioDigital.cardapio_digital.model;
 
 import com.cardapioDigital.cardapio_digital.dto.CreateAparelhoDto;
+import com.cardapioDigital.cardapio_digital.dto.UpdateAparelhoDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,7 +25,7 @@ public class Aparelho {
     @Column(nullable = false, unique = true)
     private String deviceId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "data_registry")
     private LocalDateTime dataRegistry;
 
     private Integer mesaNum;
@@ -34,5 +35,9 @@ public class Aparelho {
     public Aparelho(CreateAparelhoDto dto){
         this.deviceId = dto.deviceId();
         this.dataRegistry = LocalDateTime.now();
+    }
+
+    public void update(UpdateAparelhoDto dto) {
+        this.mesaNum = dto.mesaNum();
     }
 }
