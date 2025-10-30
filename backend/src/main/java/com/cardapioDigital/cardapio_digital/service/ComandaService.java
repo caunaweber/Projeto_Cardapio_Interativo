@@ -4,6 +4,7 @@ import com.cardapioDigital.cardapio_digital.dto.CreateComandaDto;
 import com.cardapioDigital.cardapio_digital.dto.ResponseComandaDto;
 import com.cardapioDigital.cardapio_digital.dto.UpdateComandaDto;
 import com.cardapioDigital.cardapio_digital.model.Comanda;
+import com.cardapioDigital.cardapio_digital.repository.AparelhoRepository;
 import com.cardapioDigital.cardapio_digital.repository.ComandaRepository;
 import com.cardapioDigital.cardapio_digital.repository.PratoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +24,18 @@ public class ComandaService {
     @Autowired
     private PratoRepository pratoRepository;
 
+    @Autowired
+    private AparelhoRepository aparelhoRepository;
+
     @Transactional
     public ResponseComandaDto createComanda(CreateComandaDto dto){
         int nextComandaNum = comandaRepository.findMaxComandaNum() + 1;
         Comanda comanda = Comanda.createComandaFromDto(dto);
         comanda.setComandaNum(nextComandaNum);
+
+        if(!aparelhoRepository.existsByMesaNum(dto.mesaNum())){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "A mesa vinculada a esse aparelho não existe ou não está configurada");
+        }
 
         comanda.getItens().forEach(itens -> {
             boolean pratoExistente = pratoRepository.existsById(itens.getPratoId());

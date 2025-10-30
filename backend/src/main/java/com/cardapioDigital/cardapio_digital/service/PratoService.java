@@ -90,13 +90,6 @@ public class PratoService {
         pratoRepository.deleteById(id);
     }
 
-    @Transactional
-    public void registrarVenda(Long id, int qtd){
-        Prato prato = pratoRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prato não encontrado"));
-        pratoRepository.incrementarVendas(id, qtd);
-    }
-
     private void imageDeleter(String image){
         Path imagePath = Paths.get(pastaUpload, image);
         try {

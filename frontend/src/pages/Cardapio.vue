@@ -117,8 +117,23 @@
         </div>
       </template>
       <template #actions>
-        <v-btn variant="text" @click="dialogConfirmar = false">Cancelar</v-btn>
-        <v-btn color="success" rounded="xl" variant="flat" @click="confirmarPedido">Confirmar</v-btn>
+        <v-btn
+          :disabled="comandaStore.loading"
+          variant="text"
+          @click="dialogConfirmar = false"
+        >
+          Cancelar
+        </v-btn>
+        <v-btn
+          color="success"
+          :disabled="comandaStore.loading"
+          :loading="comandaStore.loading"
+          rounded="xl"
+          variant="flat"
+          @click="confirmarPedido"
+        >
+          Confirmar
+        </v-btn>
       </template>
     </MenuDialog>
 
@@ -262,15 +277,24 @@
     dialogConfirmar.value = true
   }
 
-  function confirmarPedido () {
+  async function confirmarPedido () {
     try {
-      comandaStore.criarComanda(carrinho.pedidos, device.deviceId, device.mesaNum)
+      await comandaStore.criarComanda(carrinho.pedidos, device.mesaNum)
       carrinho.confirmarPedido()
       dialogConfirmar.value = false
       mostrarSnackbar('✅ Pedido enviado para a cozinha!', 'success')
     } catch (error) {
-      console.error('Erro ao confirmar pedido:', error)
-      mostrarSnackbar('Erro ao enviar pedido. Tente novamente.', 'error')
+      let mensagem = 'Erro ao salvar prato'
+      if (error.response?.data) {
+        const data = error.response.data
+        if (Array.isArray(data) && data.length > 0) {
+          mensagem = `[${data[0].field}]: ${data[0].message}`
+        } else if (data.message) {
+          mensagem = data.message
+        }
+      }
+      mostrarSnackbar(mensagem, 'error')
+      console.error(error)
     }
   }
 
