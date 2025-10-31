@@ -43,6 +43,8 @@
         :headers="headers"
         :items="aparelhosFiltrados"
         :items-per-page="10"
+        :loading="deviceAdminStore.loadingLista"
+        loading-text="Carregando aparelhos..."
       >
         <template #item.mesaNum="{ item }">
           Mesa {{ item.mesaNum ?? '—' }}
@@ -70,6 +72,7 @@
                   v-bind="props"
                   class="ml-1"
                   color="warning"
+                  :disabled="deviceAdminStore.loadingAcao"
                   icon
                   size="x-small"
                   variant="text"
@@ -156,8 +159,22 @@
       </template>
 
       <template #actions>
-        <v-btn variant="text" @click="dialog = false">Cancelar</v-btn>
-        <v-btn color="success" rounded="xl" @click="salvarEdicao">Salvar</v-btn>
+        <v-btn
+          :disabled="deviceAdminStore.loadingAcao"
+          variant="text"
+          @click="dialog = false"
+        >
+          Cancelar
+        </v-btn>
+        <v-btn
+          color="success"
+          :disabled="deviceAdminStore.loadingAcao"
+          :loading="deviceAdminStore.loadingAcao"
+          rounded="xl"
+          @click="salvarEdicao"
+        >
+          Salvar
+        </v-btn>
       </template>
     </MenuDialog>
 
@@ -167,6 +184,7 @@
 
     <ConfirmDialog
       v-model="confirmDialogRemover"
+      :loading="deviceAdminStore.loadingAcao"
       message="Tem certeza que deseja excluir este aparelho? Essa ação não pode ser desfeita."
       title="Remover aparelho"
       @confirm="confirmarRemover"
@@ -176,6 +194,7 @@
       v-model="confirmDialogInvalidar"
       confirm-button-color="warning"
       confirm-button-text="Invalidar"
+      :loading="deviceAdminStore.loadingAcao"
       message="Tem certeza que deseja invalidar o acesso deste aparelho? Ele precisará ser validado novamente com a chave secreta para voltar a funcionar."
       title="Invalidar Aparelho"
       @confirm="confirmarInvalidar"
@@ -313,7 +332,7 @@
       mostrarSnackbar(mensagem, 'error')
       console.error(error)
     } finally {
-      confirmDialog.value = false
+      confirmDialogRemover.value = false
       aparelhoSelecionado.value = null
     }
   }

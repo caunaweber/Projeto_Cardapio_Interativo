@@ -50,6 +50,8 @@
         item-value="id"
         :items="pratosFiltrados"
         :items-per-page="10"
+        :loading="pratoStore.loadingLista"
+        loading-text="Carregando pratos..."
         :search="search"
       >
         <template #item.imagem="{ item }">
@@ -160,8 +162,20 @@
       </template>
 
       <template #actions>
-        <v-btn variant="text" @click="dialog = false">Cancelar</v-btn>
-        <v-btn color="success" rounded="xl" @click="salvarPrato">
+        <v-btn
+          :disabled="pratoStore.loadingAcao"
+          variant="text"
+          @click="dialog = false"
+        >
+          Cancelar
+        </v-btn>
+        <v-btn
+          color="success"
+          :disabled="pratoStore.loadingAcao"
+          :loading="pratoStore.loadingAcao"
+          rounded="xl"
+          @click="salvarPrato"
+        >
           Salvar
         </v-btn>
       </template>
@@ -173,6 +187,7 @@
 
     <ConfirmDialog
       v-model="confirmDialog"
+      :loading="pratoStore.loadingAcao"
       message="Tem certeza que deseja excluir este prato? Essa ação não pode ser desfeita."
       title="Remover prato"
       @confirm="confirmarRemover"
