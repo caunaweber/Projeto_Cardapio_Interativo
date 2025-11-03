@@ -35,7 +35,7 @@
         :key="i"
         class="item-text"
       >
-        {{ item.qtd }}x {{ item.nome }}
+        {{ item.nome }} {{ item.qtd }}x
       </div>
     </div>
 

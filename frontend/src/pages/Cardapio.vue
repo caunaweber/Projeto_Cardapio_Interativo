@@ -118,7 +118,7 @@
       </template>
       <template #actions>
         <v-btn
-          :disabled="comandaStore.loading"
+          :disabled="comandaStore.loadingAcao"
           variant="text"
           @click="dialogConfirmar = false"
         >
@@ -126,8 +126,8 @@
         </v-btn>
         <v-btn
           color="success"
-          :disabled="comandaStore.loading"
-          :loading="comandaStore.loading"
+          :disabled="comandaStore.loadingAcao"
+          :loading="comandaStore.loadingAcao"
           rounded="xl"
           variant="flat"
           @click="confirmarPedido"

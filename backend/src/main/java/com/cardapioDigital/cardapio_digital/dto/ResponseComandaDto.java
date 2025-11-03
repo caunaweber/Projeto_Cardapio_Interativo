@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public record ResponseComandaDto(
@@ -15,12 +16,13 @@ public record ResponseComandaDto(
         @JsonProperty("dataCriacao") LocalDateTime dataCriacao,
         @JsonProperty("itens") List<ResponseComandaItemDto> itens
 )  {
-    public static ResponseComandaDto createComandaResponse(Comanda comanda){
+    public static ResponseComandaDto createComandaResponse(Comanda comanda, Map<Long, String> pratoNomeMap){
         List<ResponseComandaItemDto> itens = comanda.getItens()
                 .stream()
                 .map(item -> new ResponseComandaItemDto(
                         item.getId(),
                         item.getPratoId(),
+                        pratoNomeMap.getOrDefault(item.getPratoId(), "Prato não encontrado"),
                         item.getQtd()
                 )).collect(Collectors.toList());
         return new ResponseComandaDto(

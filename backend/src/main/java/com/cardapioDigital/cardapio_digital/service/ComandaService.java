@@ -1,9 +1,12 @@
 package com.cardapioDigital.cardapio_digital.service;
 
 import com.cardapioDigital.cardapio_digital.dto.CreateComandaDto;
+import com.cardapioDigital.cardapio_digital.dto.CreateComandaItemDto;
 import com.cardapioDigital.cardapio_digital.dto.ResponseComandaDto;
 import com.cardapioDigital.cardapio_digital.dto.UpdateComandaDto;
 import com.cardapioDigital.cardapio_digital.model.Comanda;
+import com.cardapioDigital.cardapio_digital.model.ComandaItens;
+import com.cardapioDigital.cardapio_digital.model.Prato;
 import com.cardapioDigital.cardapio_digital.repository.AparelhoRepository;
 import com.cardapioDigital.cardapio_digital.repository.ComandaRepository;
 import com.cardapioDigital.cardapio_digital.repository.PratoRepository;
@@ -14,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,25 +42,35 @@ public class ComandaService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "A mesa vinculada a esse aparelho não existe ou não está configurada");
         }
 
+        Set<Long> pratoIds = dto.itens().stream()
+                .map(CreateComandaItemDto::pratoId)
+                        .collect(Collectors.toSet());
+
+        Map<Long, String> pratoNomeMap = getPratoNomeMap(pratoIds);
+
         comanda.getItens().forEach(itens -> {
-            boolean pratoExistente = pratoRepository.existsById(itens.getPratoId());
-            if (!pratoExistente) {
+
+            if(!pratoNomeMap.containsKey(itens.getPratoId())){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Prato com id "+ itens.getPratoId()+" não existe");
             }
+
             if(itens.getQtd() <=0 ){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O valor de quantidade não pode ser menor ou igual a zero");
             }
             pratoRepository.incrementarVendas(itens.getPratoId(), itens.getQtd());
         });
-        return ResponseComandaDto.createComandaResponse(comandaRepository.save(comanda));
+        return ResponseComandaDto.createComandaResponse(comandaRepository.save(comanda), pratoNomeMap);
     }
 
     @Transactional(readOnly = true)
     public List<ResponseComandaDto> getAllComandas() {
         List<Comanda> comandas = comandaRepository.findAllWithItensOrderByDataCriacaoDesc();
+
+        Map<Long, String> pratoNomeMap = getAllPratoNomesMap();
+
         return comandas
                 .stream()
-                .map(ResponseComandaDto::createComandaResponse)
+                .map(comanda -> ResponseComandaDto.createComandaResponse(comanda, pratoNomeMap))
                 .collect(Collectors.toList());
     }
 
@@ -63,7 +78,14 @@ public class ComandaService {
     public ResponseComandaDto getComandaById(Long id) {
         Comanda comanda = comandaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comanda não encontrada"));
-        return ResponseComandaDto.createComandaResponse(comanda);
+
+        Set<Long> pratoIds = comanda.getItens().stream()
+                .map(ComandaItens::getPratoId)
+                .collect(Collectors.toSet());
+
+        Map<Long, String> pratoNomeMap = getPratoNomeMap(pratoIds);
+
+        return ResponseComandaDto.createComandaResponse(comanda, pratoNomeMap);
     }
 
     @Transactional
@@ -78,6 +100,12 @@ public class ComandaService {
         Comanda comanda = comandaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comanda inexistente"));
 
+        Set<Long> pratoIds = dto.itens().stream()
+                .map(CreateComandaItemDto::pratoId)
+                .collect(Collectors.toSet());
+
+        Map<Long, String> pratoNomeMap = getPratoNomeMap(pratoIds);
+
         comanda.getItens().forEach(itens -> {
             pratoRepository.incrementarVendas(itens.getPratoId(), -itens.getQtd());
         });
@@ -85,7 +113,7 @@ public class ComandaService {
         comanda.getItens().clear();
 
         dto.itens().forEach(itemDto -> {
-            if (!pratoRepository.existsById(itemDto.pratoId())) {
+            if (!pratoNomeMap.containsKey(itemDto.pratoId())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Prato com id " + itemDto.pratoId() + " não existe");
             }
             if (itemDto.qtd() <= 0) {
@@ -96,8 +124,19 @@ public class ComandaService {
                     com.cardapioDigital.cardapio_digital.model.ComandaItens.createComandaItem(itemDto)
             );
         });
-        Comanda comandaAtualizada = comandaRepository.save(comanda);
-        return ResponseComandaDto.createComandaResponse(comandaAtualizada);
+        return ResponseComandaDto.createComandaResponse(comandaRepository.save(comanda), pratoNomeMap);
+    }
+
+    private Map<Long, String> getPratoNomeMap(Set<Long> pratoIds) {
+        return pratoRepository.findAllById(pratoIds)
+                .stream()
+                .collect(Collectors.toMap(Prato::getId, Prato::getNome));
+    }
+
+    private Map<Long, String> getAllPratoNomesMap() {
+        return pratoRepository.findAll()
+                .stream()
+                .collect(Collectors.toMap(Prato::getId, Prato::getNome));
     }
 }
 
