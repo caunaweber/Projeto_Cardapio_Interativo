@@ -2,6 +2,7 @@ package com.cardapioDigital.cardapio_digital.controller;
 
 import com.cardapioDigital.cardapio_digital.dto.ResponseComandaDto;
 import com.cardapioDigital.cardapio_digital.dto.UpdateComandaDto;
+import com.cardapioDigital.cardapio_digital.dto.UpdateComandaStatusDto;
 import com.cardapioDigital.cardapio_digital.service.ComandaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class ComandaController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteComandaById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteComandaById(@PathVariable Long id) {
         comandaService.deleteComanda(id);
         return ResponseEntity.noContent().build();
     }
@@ -36,4 +37,17 @@ public class ComandaController {
     public ResponseEntity<ResponseComandaDto> updateComandaById(@PathVariable Long id, @RequestBody UpdateComandaDto dto) {
         return ResponseEntity.ok(comandaService.updateComanda(id, dto));
     }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ResponseComandaDto> atualizarStatus(@PathVariable Long id, @RequestBody UpdateComandaStatusDto dto) {
+        return ResponseEntity.ok(comandaService.atualizarStatus(id, dto));
+    }
+
+    @DeleteMapping("/entregues")
+    public ResponseEntity<Void> deleteAllEntregues() {
+        comandaService.deleteAllEntregues();
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

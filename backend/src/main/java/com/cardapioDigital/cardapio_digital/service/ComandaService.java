@@ -1,9 +1,7 @@
 package com.cardapioDigital.cardapio_digital.service;
 
-import com.cardapioDigital.cardapio_digital.dto.CreateComandaDto;
-import com.cardapioDigital.cardapio_digital.dto.CreateComandaItemDto;
-import com.cardapioDigital.cardapio_digital.dto.ResponseComandaDto;
-import com.cardapioDigital.cardapio_digital.dto.UpdateComandaDto;
+import com.cardapioDigital.cardapio_digital.dto.*;
+import com.cardapioDigital.cardapio_digital.enums.ComandaStatus;
 import com.cardapioDigital.cardapio_digital.model.Comanda;
 import com.cardapioDigital.cardapio_digital.model.ComandaItens;
 import com.cardapioDigital.cardapio_digital.model.Prato;
@@ -18,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,7 +33,7 @@ public class ComandaService {
 
     @Transactional
     public ResponseComandaDto createComanda(CreateComandaDto dto){
-        int nextComandaNum = comandaRepository.findMaxComandaNum() + 1;
+        int nextComandaNum = Optional.ofNullable(comandaRepository.findMaxComandaNum()).orElse(0) + 1;
         Comanda comanda = Comanda.createComandaFromDto(dto);
         comanda.setComandaNum(nextComandaNum);
 
@@ -96,6 +95,29 @@ public class ComandaService {
     }
 
     @Transactional
+    public ResponseComandaDto atualizarStatus(Long id, UpdateComandaStatusDto dto) {
+        Comanda comanda = comandaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comanda não encontrada"));
+
+        try {
+            comanda.setStatus(ComandaStatus.valueOf(String.valueOf(dto.status()).toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status inválido: " + dto.status());
+        }
+        comandaRepository.save(comanda);
+
+        Set<Long> pratoIds = comanda.getItens().stream()
+                .map(ComandaItens::getPratoId)
+                .collect(Collectors.toSet());
+
+        Map<Long, String> pratoNomeMap = getPratoNomeMap(pratoIds);
+
+        return ResponseComandaDto.createComandaResponse(comanda, pratoNomeMap);
+    }
+
+
+
+    @Transactional
     public ResponseComandaDto updateComanda(Long id, UpdateComandaDto dto) {
         Comanda comanda = comandaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comanda inexistente"));
@@ -112,6 +134,10 @@ public class ComandaService {
 
         comanda.getItens().clear();
 
+        if (dto.itens().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A comanda deve conter pelo menos um item");
+        }
+
         dto.itens().forEach(itemDto -> {
             if (!pratoNomeMap.containsKey(itemDto.pratoId())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Prato com id " + itemDto.pratoId() + " não existe");
@@ -126,6 +152,16 @@ public class ComandaService {
         });
         return ResponseComandaDto.createComandaResponse(comandaRepository.save(comanda), pratoNomeMap);
     }
+
+    @Transactional
+    public void deleteAllEntregues() {
+        List<Comanda> entregues = comandaRepository.findByStatus(ComandaStatus.ENTREGUE);
+        if (entregues.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT, "Nenhuma comanda entregue encontrada para exclusão");
+        }
+        comandaRepository.deleteAll(entregues);
+    }
+
 
     private Map<Long, String> getPratoNomeMap(Set<Long> pratoIds) {
         return pratoRepository.findAllById(pratoIds)

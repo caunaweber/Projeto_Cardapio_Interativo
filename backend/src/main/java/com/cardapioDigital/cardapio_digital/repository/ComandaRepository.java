@@ -1,5 +1,6 @@
 package com.cardapioDigital.cardapio_digital.repository;
 
+import com.cardapioDigital.cardapio_digital.enums.ComandaStatus;
 import com.cardapioDigital.cardapio_digital.model.Comanda;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +20,6 @@ public interface ComandaRepository extends JpaRepository<Comanda, Long> {
 
     @EntityGraph(attributePaths = {"itens"})
     Optional<Comanda> findById(Long id);
+
+    List<Comanda> findByStatus(ComandaStatus comandaStatus);
 }
