@@ -1,6 +1,7 @@
 package com.cardapioDigital.cardapio_digital.service;
 
 import com.cardapioDigital.cardapio_digital.dto.CreatePratoDto;
+import com.cardapioDigital.cardapio_digital.dto.ResponseMetricasDto;
 import com.cardapioDigital.cardapio_digital.dto.ResponsePratoDto;
 import com.cardapioDigital.cardapio_digital.dto.UpdatePratoDto;
 import com.cardapioDigital.cardapio_digital.model.Prato;
@@ -42,6 +43,14 @@ public class PratoService {
         Prato prato = pratoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prato não encontrado"));
                 return new ResponsePratoDto(prato);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResponseMetricasDto> getMetricas() {
+        return pratoRepository.findAll()
+                .stream()
+                .map(ResponseMetricasDto::new)
+                .collect(Collectors.toList());
     }
 
     @Transactional

@@ -84,6 +84,7 @@ public class AparelhoService {
         Aparelho aparelho = aparelhoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aparelho não encontrado"));
         aparelho.setValidated(false);
+        aparelho.setMesaNum(null);
         return new ResponseAparelhoDto(aparelho);
     }
 

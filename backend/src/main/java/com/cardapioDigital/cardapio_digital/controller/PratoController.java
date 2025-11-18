@@ -1,6 +1,7 @@
 package com.cardapioDigital.cardapio_digital.controller;
 
 import com.cardapioDigital.cardapio_digital.dto.CreatePratoDto;
+import com.cardapioDigital.cardapio_digital.dto.ResponseMetricasDto;
 import com.cardapioDigital.cardapio_digital.dto.ResponsePratoDto;
 import com.cardapioDigital.cardapio_digital.dto.UpdatePratoDto;
 import com.cardapioDigital.cardapio_digital.service.PratoService;
@@ -46,6 +47,11 @@ public class PratoController {
     public ResponseEntity<ResponsePratoDto> updatePrato(@PathVariable Long id, @RequestPart("dados") @Valid UpdatePratoDto dto,
                                                         @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
         return ResponseEntity.status(HttpStatus.OK).body(pratoService.updatePrato(id, dto, imagem));
+    }
+
+    @GetMapping("/metricas")
+    public ResponseEntity<List<ResponseMetricasDto>> getMetricas() {
+        return ResponseEntity.ok(pratoService.getMetricas());
     }
 }
 

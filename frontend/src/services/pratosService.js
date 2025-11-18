@@ -42,3 +42,8 @@ export async function atualizarPrato (id, dados, imagemFile) {
 export async function removerPrato (id) {
   await api.delete(`/pratos/${id}`)
 }
+
+export async function getMetricas () {
+  const res = await api.get('/pratos/metricas')
+  return res.data
+}

@@ -332,8 +332,9 @@
   }
 
   function adicionarItem () {
+    const primeiroPrato = pratos.value[0]
     comandaEditando.value.itens.push({
-      pratoId: pratos.value.length > 0 ? pratos.value[0].id : null,
+      pratoId: primeiroPrato ? primeiroPrato.id : null,
       qtd: 1,
     })
   }
