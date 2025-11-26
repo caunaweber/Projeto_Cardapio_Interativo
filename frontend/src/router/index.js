@@ -18,22 +18,28 @@ const routes = [
         name: 'Cardapio',
         component: Cardapio,
       },
-      { path: '/comandas',
+      {
+        path: '/comandas',
         name: 'Comandas',
         component: Comandas,
+        meta: { requiresAuth: true, requiresCozinha: true },
       },
       {
         path: '/login',
         name: 'Login',
         component: AdminLogin,
       },
+      {
+        path: '/comandas/login',
+        name: 'LoginCozinha',
+        component: () => import('@/pages/CozinhaLogin.vue'),
+      },
     ],
   },
   {
     path: '/admin',
     component: Default,
-    // comentando pra nao ficar enchendo o saco nos testes
-    // meta: { requiresAuth: true, requiresAdmin: true },
+    meta: { requiresAuth: true, requiresAdmin: true },
     children: [
       {
         path: 'pratos',
@@ -62,11 +68,19 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
 
-  if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return next({ name: 'Login' })
+  if (to.meta.requiresCozinha && !auth.isCozinha) {
+    return next({ name: 'LoginCozinha' })
   }
 
   if (to.meta.requiresAdmin && !auth.isAdmin) {
+    return next({ name: 'Login' })
+  }
+
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    if (to.meta.requiresCozinha) {
+      return next({ name: 'LoginCozinha' })
+    }
+
     return next({ name: 'Login' })
   }
 

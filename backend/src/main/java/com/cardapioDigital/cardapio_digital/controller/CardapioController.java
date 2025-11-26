@@ -38,8 +38,7 @@ public class CardapioController {
 
     @PostMapping("/register")
     public ResponseEntity<ResponseAparelhoDto> create(@RequestBody @Valid CreateAparelhoDto dto) {
-        Aparelho aparelho = aparelhoService.createOrReturnAparelho(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseAparelhoDto(aparelho));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseAparelhoDto(aparelhoService.createOrReturnAparelho(dto)));
     }
 
     @GetMapping("/verify/{deviceId}")

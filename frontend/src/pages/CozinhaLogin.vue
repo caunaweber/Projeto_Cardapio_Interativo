@@ -12,7 +12,7 @@
       </div>
 
       <h2 class="text-center mb-6 text-h4" style="color: var(--v-theme-primary)">
-        🔒 <br> Administração
+        🔒 <br> Cozinha
       </h2>
 
       <v-form ref="formRef" @submit.prevent="fazerLogin">
@@ -67,16 +67,20 @@
   import { useRouter } from 'vue-router'
   import { useAuthStore } from '@/stores/authStore'
 
-  const router = useRouter()
   const email = ref('')
   const senha = ref('')
   const erro = ref('')
 
+  const router = useRouter()
   const auth = useAuthStore()
 
   function fazerLogin () {
     if (auth.login(email.value, senha.value)) {
-      router.push({ name: 'AdminMetricas' })
+      if (auth.isCozinha) {
+        router.push({ name: 'Comandas' })
+      } else {
+        erro.value = 'Você não é da cozinha.'
+      }
     } else {
       erro.value = 'Email ou senha incorretos.'
     }
